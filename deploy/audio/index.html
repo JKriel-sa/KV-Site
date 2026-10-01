@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Audio — Kriel Ventures</title>
+<meta name="description" content="Audio at Kriel Ventures. This page is under construction.">
+<meta name="theme-color" content="#0B0B0B">
+<!-- Holding page: keep it out of search results until there's real content. -->
+<meta name="robots" content="noindex">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../favicon.jpg" type="image/jpeg" sizes="512x512">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="preload" href="../fonts/stadium.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="../pg.css">
+
+<!-- Reveal animations only exist if JS does; without it everything is simply visible. -->
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<a class="skip-link" href="#content">Skip to content</a>
+
+<!-- ── Fixed menu control ───────────────────────────────────────────── -->
+<button id="menu-toggle" class="menu-btn" aria-expanded="false" aria-controls="site-menu">
+  <span class="menu-btn__label" data-open="Menu" data-close="Close">Menu</span>
+</button>
+
+<nav id="site-menu" class="menu" aria-label="Main" hidden>
+  <div class="menu__inner">
+    <p class="menu__eyebrow">Kriel Ventures</p>
+    <ul class="menu__list">
+      <li><a href="../photography/"><span class="menu__num">01</span>Photography</a></li>
+      <li><a href="../videography/"><span class="menu__num">02</span>Videography</a></li>
+      <li><a href="../web-design/"><span class="menu__num">03</span>Web Design</a></li>
+      <li><a href="./" aria-current="page"><span class="menu__num">04</span>Audio</a></li>
+      <li><a href="../#contact"><span class="menu__num">—</span>Contact</a></li>
+    </ul>
+    <div class="menu__foot">
+      <a href="mailto:josh@kriel.us">josh@kriel.us</a>
+    </div>
+  </div>
+</nav>
+
+<main class="holding" id="content" data-key="audio">
+  <p class="opening__mark"><a href="../">Kriel Ventures</a></p>
+
+  <div class="holding__body">
+    <p class="holding__label"><span>Service 04</span><span>Sound</span></p>
+    <h1 class="holding__title"><span class="rise"><span>Audio</span></span></h1>
+
+    <hr class="holding__rule">
+
+    <p class="holding__state">Under construction</p>
+    <p class="holding__note">This page is being built. The work and rates for
+    audio are available on request — email
+    <a href="mailto:josh@kriel.us">josh@kriel.us</a>, or
+    <a href="#estimate">build yourself an estimate</a> without waiting for us.</p>
+  </div>
+
+  <div class="holding__foot">
+    <a href="../">&larr; Back to Kriel Ventures</a>
+    <a href="mailto:josh@kriel.us">josh@kriel.us</a>
+  </div>
+</main>
+
+<!-- ── Proposal generator ───────────────────────────────────────────────
+     The card is built by pg.js. The form below is deliberately in the static
+     markup: Netlify registers forms by parsing deployed HTML, so one created
+     by script would never receive a submission.
+     ------------------------------------------------------------------- -->
+<section class="pg" id="estimate" data-key="audio" aria-labelledby="pg-title">
+  <div class="pg__wrap">
+    <p class="pg__eyebrow">Proposal generator</p>
+    <h2 class="pg__title" id="pg-title">Price an audio project</h2>
+    <p class="pg__intro">Tell us what you're making and what state it's in, and you'll get an estimate that keeps studio time and finishing time separate — because they're different work.</p>
+
+    <div class="pg__app" id="pg-app">
+      <noscript>
+        <p class="pg__noscript">The estimator needs JavaScript, which is off in
+        this browser. Email <a href="mailto:josh@kriel.us">josh@kriel.us</a> with
+        what you have in mind and you'll get the same answer from a person,
+        usually within a day.</p>
+      </noscript>
+    </div>
+
+    <form id="pg-form" name="proposal" method="POST" data-netlify="true"
+          netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="proposal">
+      <p hidden><label>Leave this empty: <input name="bot-field"></label></p>
+      <input type="hidden" name="service">
+      <input type="hidden" name="client_name">
+      <input type="hidden" name="client_email">
+      <input type="hidden" name="client_phone">
+      <input type="hidden" name="client_company">
+      <input type="hidden" name="project_name">
+      <input type="hidden" name="target_date">
+      <input type="hidden" name="template">
+      <input type="hidden" name="estimate_low">
+      <input type="hidden" name="estimate_high">
+      <input type="hidden" name="confidence">
+      <textarea name="summary"></textarea>
+      <textarea name="thankyou_email"></textarea>
+    </form>
+  </div>
+</section>
+
+<script src="../main.js"></script>
+<script src="../pg-intake.js"></script>
+<script src="../pg-audio.js"></script>
+<script src="../pg.js"></script>
+</body>
+</html>

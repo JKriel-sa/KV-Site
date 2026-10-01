@@ -1,0 +1,17 @@
+{
+  "//": "The preview process is sandboxed out of this project directory: it cannot open a relative script ('serve.py' -> EPERM), `-m http.server` dies in os.getcwd(), plain `-c` dies on import because Python puts the unreadable cwd first on sys.path, and symlinks pointing back here resolve to the same blocked path. Re-tested 2026-08-17 by pointing a second config straight at deploy/ — every path 404'd, so the restriction still holds and the mirror is still required. The site is therefore mirrored to /tmp/kv-website-preview (which the preview CAN read) by ./build.sh, and served from there with -I (isolated: no cwd on sys.path) and -c (no script file to open). Run ./build.sh before previewing, and again after any edit.",
+  "//2": "list_directory is overridden to 404. Without it an empty or half-copied mirror answers 200 with a directory listing, so a completely broken preview looks healthy to curl and to any status check — which is exactly how a stale mirror went unnoticed once. Better a loud 404 naming the fix.",
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kv-website",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-I",
+        "-c",
+        "import http.server,functools;B=http.server.SimpleHTTPRequestHandler;C=type('C',(B,),{'list_directory':lambda s,p:s.send_error(404,'No index.html here - the preview mirror is empty or stale; run ./build.sh')});H=functools.partial(C,directory='/tmp/kv-website-preview');http.server.ThreadingHTTPServer(('127.0.0.1',4321),H).serve_forever()"
+      ],
+      "port": 4321
+    }
+  ]
+}

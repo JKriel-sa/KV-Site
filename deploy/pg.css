@@ -1,0 +1,490 @@
+/* ==========================================================================
+   Proposal generator
+   Lives under the holding page on each service. Same palette and the same two
+   faces as the rest of the site; the difference is that this block has to be
+   *usable* rather than only looked at, so the type comes down to a working
+   size and the accent stops carrying meaning.
+
+   On the accent: each service's --accent is set on [data-key] in styles.css.
+   Three of the four (blue #2438F0 especially, at 1.9:1 on ink) are nowhere
+   near readable as small text on black. They're used here only for large
+   display type, rules, and the progress fill — never for a label, a value, or
+   anything a person has to read at 15px. Text is bone or ink-soft throughout.
+   ========================================================================== */
+
+.pg {
+  background: var(--ink);
+  padding: clamp(2.5rem, 7vh, 5rem) var(--edge) clamp(3rem, 9vh, 6rem);
+  border-top: 1px solid rgba(242, 239, 232, 0.12);
+}
+
+.pg__wrap { max-width: 54rem; margin-inline: auto; }
+
+/* --- Heading -------------------------------------------------------------- */
+.pg__eyebrow {
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: clamp(0.78rem, 0.72rem + 0.22vw, 0.95rem);
+  letter-spacing: -0.012em;
+  color: var(--accent);
+  margin-bottom: 0.4em;
+}
+
+.pg__title {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 1rem + 3.4vw, 3.4rem);
+  line-height: 1.08;
+  letter-spacing: 0.012em;
+  color: var(--bone);
+}
+
+.pg__intro {
+  max-width: 52ch;
+  margin-top: 1rem;
+  font-family: var(--ui);
+  font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.1rem);
+  color: var(--ink-soft);
+}
+.pg__intro a { color: var(--bone); text-decoration: underline; text-underline-offset: 3px; }
+
+/* --- The card ------------------------------------------------------------- */
+.pg__app {
+  margin-top: clamp(1.75rem, 4vh, 2.75rem);
+  background: #131313;
+  border: 1px solid rgba(242, 239, 232, 0.13);
+  border-radius: 14px;
+  padding: clamp(1.25rem, 3vw, 2.25rem);
+}
+
+.pg__noscript {
+  font-family: var(--ui);
+  color: var(--ink-soft);
+}
+.pg__noscript a { color: var(--bone); }
+
+/* --- Progress ------------------------------------------------------------
+   A real <progress> rather than a div with a width set from script: CSP here
+   forbids inline styles, and this is the element the platform already gives
+   us for "n of m" with the semantics attached.
+   ------------------------------------------------------------------------ */
+.pg__progress { margin-bottom: clamp(1.25rem, 3vh, 1.9rem); }
+
+.pg__steplabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+  margin-bottom: 0.6rem;
+}
+.pg__steplabel b { color: var(--bone); font-weight: 700; }
+
+.pg__bar {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border: 0;
+  border-radius: 2px;
+  background: rgba(242, 239, 232, 0.14);   /* Firefox track */
+  color: var(--accent);                     /* IE/legacy fill */
+  appearance: none;
+  -webkit-appearance: none;
+}
+.pg__bar::-webkit-progress-bar { background: rgba(242, 239, 232, 0.14); border-radius: 2px; }
+.pg__bar::-webkit-progress-value { background: var(--accent); border-radius: 2px; }
+.pg__bar::-moz-progress-bar { background: var(--accent); border-radius: 2px; }
+
+/* --- Step ----------------------------------------------------------------- */
+/* The step heading carries tabindex="-1" so each new step can be focused and
+   announced. Suppressing its ring is safe here and normally wouldn't be: it is
+   not in the tab order, so no keyboard user can ever land on it by navigating —
+   only our own scripted focus reaches it. Left visible, the 3px ring from
+   styles.css draws a box round the title that reads as an error state. */
+.pg__steptitle:focus,
+.pg__steptitle:focus-visible,
+.pg__donemark:focus,
+.pg__donemark:focus-visible { outline: none; }
+
+.pg__steptitle {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.9rem);
+  line-height: 1.15;
+  letter-spacing: 0.012em;
+  color: var(--bone);
+}
+
+.pg__stepnote {
+  max-width: 56ch;
+  margin-top: 0.5rem;
+  font-family: var(--ui);
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+
+.pg__fields {
+  display: grid;
+  gap: clamp(1rem, 2.4vh, 1.4rem);
+  margin-top: clamp(1.25rem, 3vh, 1.75rem);
+}
+
+/* --- Field ---------------------------------------------------------------- */
+.pgf { display: grid; gap: 0.45rem; }
+
+/* Two-up on wider screens for the short fields, so the intake doesn't read as
+   an endless single column. Marked per field in the config, not guessed. */
+@media (min-width: 700px) {
+  .pg__fields { grid-template-columns: 1fr 1fr; }
+  .pgf { grid-column: span 2; }
+  .pgf--half { grid-column: span 1; }
+}
+
+.pgf__label {
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: -0.01em;
+  color: var(--bone);
+}
+.pgf__opt {
+  font-weight: 500;
+  font-size: 0.82em;
+  color: var(--ink-soft);
+  margin-left: 0.5em;
+}
+
+.pgf__help {
+  font-family: var(--ui);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.pgf__input,
+.pgf__select,
+.pgf__textarea {
+  width: 100%;
+  min-height: 46px;                 /* thumb-sized on a phone */
+  padding: 0.6rem 0.75rem;
+  background: #1B1B1B;
+  color: var(--bone);
+  border: 1px solid rgba(242, 239, 232, 0.22);
+  border-radius: 8px;
+  font-family: var(--ui);
+  font-weight: 500;
+  font-size: 1rem;                  /* 16px: anything smaller zooms iOS Safari */
+  line-height: 1.4;
+  transition: border-color 0.18s var(--ease);
+}
+.pgf__textarea { min-height: 96px; resize: vertical; }
+
+.pgf__input::placeholder { color: #6A6A6A; }
+
+.pgf__input:hover,
+.pgf__select:hover,
+.pgf__textarea:hover { border-color: rgba(242, 239, 232, 0.4); }
+
+.pgf__input:focus-visible,
+.pgf__select:focus-visible,
+.pgf__textarea:focus-visible { outline: 3px solid var(--bone); outline-offset: 2px; }
+
+/* The native arrow is invisible on a dark control in several browsers, so the
+   select keeps room at its right edge and draws its own. */
+.pgf__select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 2.4rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--bone) 50%),
+    linear-gradient(135deg, var(--bone) 50%, transparent 50%);
+  background-position: right 1.05rem top 55%, right 0.75rem top 55%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+}
+.pgf__select option { background: #1B1B1B; color: var(--bone); }
+
+/* Number inputs: the spinners are tiny targets and we never need them. */
+.pgf__input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+.pgf__input[type="number"]::-webkit-outer-spin-button,
+.pgf__input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* --- Choice groups (checkbox / radio) ------------------------------------- */
+.pgf__choices { display: grid; gap: 0.4rem; }
+
+@media (min-width: 560px) {
+  .pgf__choices--grid { grid-template-columns: 1fr 1fr; }
+}
+
+.pgc {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  min-height: 44px;
+  padding: 0.55rem 0.75rem;
+  background: #1B1B1B;
+  border: 1px solid rgba(242, 239, 232, 0.18);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--ui);
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: var(--bone);
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+.pgc:hover { border-color: rgba(242, 239, 232, 0.42); }
+.pgc input { flex: none; width: 18px; height: 18px; margin-top: 0.15rem; accent-color: var(--bone); }
+.pgc:has(input:checked) { background: #242424; border-color: var(--bone); }
+.pgc:has(input:focus-visible) { outline: 3px solid var(--bone); outline-offset: 2px; }
+
+/* A lone yes/no reads better as one switchable row than as a group of one. */
+.pgf--bool .pgc { max-width: 100%; }
+
+/* --- Errors --------------------------------------------------------------- */
+.pgf--error .pgf__input,
+.pgf--error .pgf__select,
+.pgf--error .pgf__textarea { border-color: #FF8B7A; }
+
+.pgf__error {
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #FF8B7A;          /* 6.4:1 on ink — the red accent would be 3.1:1 */
+}
+
+.pg__alert {
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #FF8B7A;
+  border-radius: 8px;
+  font-family: var(--ui);
+  font-size: 0.9rem;
+  color: #FF8B7A;
+}
+
+/* --- Actions -------------------------------------------------------------- */
+.pg__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+  margin-top: clamp(1.5rem, 3.5vh, 2.25rem);
+  padding-top: clamp(1.25rem, 3vh, 1.75rem);
+  border-top: 1px solid rgba(242, 239, 232, 0.13);
+}
+
+.pg__btn {
+  min-height: 48px;
+  padding: 0.7rem 1.5rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -0.015em;
+  transition: background 0.22s var(--ease), color 0.22s var(--ease), border-color 0.22s var(--ease);
+}
+.pg__btn--go { background: var(--bone); color: var(--ink); }
+.pg__btn--go:hover { background: #fff; }
+.pg__btn--back { background: transparent; color: var(--ink-soft); border-color: rgba(242, 239, 232, 0.24); }
+.pg__btn--back:hover { color: var(--bone); border-color: var(--bone); }
+.pg__btn[disabled] { opacity: 0.5; cursor: default; }
+.pg__btn--spacer { margin-left: auto; }
+
+/* --- Review --------------------------------------------------------------- */
+.pg__review { display: grid; gap: 1.25rem; margin-top: 1.5rem; }
+
+.pg__group {
+  border: 1px solid rgba(242, 239, 232, 0.13);
+  border-radius: 10px;
+  padding: 1rem 1.1rem;
+}
+.pg__grouphead {
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.7rem;
+}
+
+.pg__dl { display: grid; gap: 0.5rem; font-family: var(--ui); font-size: 0.92rem; }
+.pg__row { display: grid; grid-template-columns: 1fr; gap: 0.1rem; }
+@media (min-width: 620px) { .pg__row { grid-template-columns: 15rem 1fr; gap: 1rem; } }
+.pg__row dt { color: var(--ink-soft); }
+.pg__row dd { margin: 0; color: var(--bone); }
+
+/* --- Estimate ------------------------------------------------------------- */
+.pg__banner {
+  margin-bottom: 1.5rem;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid rgba(217, 177, 131, 0.55);
+  border-radius: 10px;
+  font-family: var(--ui);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--tan);
+}
+
+.pg__tiers { display: grid; gap: 0.9rem; margin: 1.5rem 0; }
+@media (min-width: 760px) { .pg__tiers { grid-template-columns: repeat(3, 1fr); } }
+
+.pgt {
+  border: 1px solid rgba(242, 239, 232, 0.15);
+  border-radius: 12px;
+  padding: 1.1rem;
+}
+.pgt--pick { border-color: var(--bone); background: #1A1A1A; }
+
+.pgt__name {
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.pgt--pick .pgt__name { color: var(--tan); }
+
+.pgt__fig {
+  margin: 0.5rem 0 0.15rem;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 1.2rem + 1.5vw, 2.1rem);
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  color: var(--bone);
+}
+.pgt__band { font-family: var(--ui); font-size: 0.8rem; color: var(--ink-soft); }
+
+.pgt__changes {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.35rem;
+  font-family: var(--ui);
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+.pgt__changes li { padding-left: 0.9rem; text-indent: -0.9rem; }
+.pgt__changes li::before { content: "— "; color: var(--bone); }
+
+/* --- Line items ----------------------------------------------------------- */
+.pg__tablewrap { overflow-x: auto; margin-top: 0.5rem; }
+
+.pg__table {
+  width: 100%;
+  min-width: 30rem;
+  border-collapse: collapse;
+  font-family: var(--ui);
+  font-size: 0.88rem;
+}
+.pg__table th,
+.pg__table td { padding: 0.5rem 0.6rem; text-align: left; vertical-align: top; }
+.pg__table thead th {
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border-bottom: 1px solid rgba(242, 239, 232, 0.18);
+}
+.pg__table td { color: var(--bone); border-bottom: 1px solid rgba(242, 239, 232, 0.08); }
+.pg__table .pg__num { text-align: right; white-space: nowrap; }
+.pg__table tbody th {
+  padding-top: 1.1rem;
+  font-family: var(--ui);
+  font-weight: 700;
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tan);
+}
+.pg__table tr.pg__sum td { font-weight: 700; border-bottom: 1px solid rgba(242, 239, 232, 0.25); }
+.pg__table tr.pg__tot td {
+  font-weight: 700;
+  font-size: 1rem;
+  border-bottom: 0;
+  border-top: 1px solid rgba(242, 239, 232, 0.25);
+}
+
+/* --- Notes, flags, deferred ----------------------------------------------- */
+.pg__notes { display: grid; gap: 0.5rem; margin-top: 1.25rem; }
+.pg__note {
+  font-family: var(--ui);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  padding-left: 1rem;
+  border-left: 2px solid var(--tan);
+}
+.pg__note b { color: var(--bone); font-weight: 700; }
+
+.pg__list {
+  display: grid;
+  gap: 0.3rem;
+  font-family: var(--ui);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+.pg__list li { padding-left: 0.9rem; text-indent: -0.9rem; }
+.pg__list li::before { content: "— "; color: var(--bone); }
+
+/* --- Email draft ---------------------------------------------------------- */
+.pg__mail {
+  margin-top: 0.6rem;
+  padding: 1rem;
+  background: #0E0E0E;
+  border: 1px solid rgba(242, 239, 232, 0.13);
+  border-radius: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--bone);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/* --- Done ----------------------------------------------------------------- */
+.pg__done { text-align: left; }
+.pg__donemark {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 1.2rem + 2vw, 2.6rem);
+  line-height: 1.1;
+  letter-spacing: 0.012em;
+  color: var(--bone);
+}
+.pg__donenote {
+  max-width: 54ch;
+  margin-top: 0.9rem;
+  font-family: var(--ui);
+  font-size: 1rem;
+  color: var(--ink-soft);
+}
+.pg__donenote a { color: var(--bone); }
+
+/* --- Print ----------------------------------------------------------------
+   People print or PDF an estimate. On paper the dark card is a waste of ink
+   and the controls are meaningless, so both go.
+   ------------------------------------------------------------------------ */
+@media print {
+  .pg { background: #fff; color: #000; border-top: 0; padding: 0; }
+  .pg__app { background: #fff; border: 0; padding: 0; }
+  .pg__title, .pg__steptitle, .pgt__fig, .pg__donemark { color: #000; }
+  .pg__intro, .pg__stepnote, .pgt__band, .pgt__changes, .pg__note, .pg__list, .pg__row dt { color: #333; }
+  .pg__table td, .pg__row dd { color: #000; }
+  .pgt, .pg__group, .pg__mail { border-color: #999; background: #fff; }
+  .pg__mail { color: #000; }
+  .pg__actions, .pg__progress, .menu-btn, .pg__btn { display: none; }
+}
+
+/* --- Reduced motion ------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .pgf__input, .pgf__select, .pgf__textarea, .pgc, .pg__btn { transition: none; }
+}

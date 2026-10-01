@@ -1,0 +1,3 @@
+# macOS Finder litter. build.sh also strips these from deploy/ before publishing.
+.DS_Store
+**/.DS_Store
