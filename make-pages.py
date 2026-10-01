@@ -45,6 +45,74 @@ PITCH = {
                     "separate — because they're different work."),
 }
 
+# Three worked examples per service, shown under the generator. Every figure
+# was computed by the live generator, not estimated by hand — see
+# proposal-generators/EXAMPLES.md. They are static markup rather than rendered
+# by pg.js so they are on screen the moment the page paints, and still there
+# with scripting off.
+EXAMPLES = {
+    "photography": [
+        ("Team headshots", "$1,274",
+         ["Half a day at your office", "15 finished images, standard retouch",
+          "Website and LinkedIn, three years"]),
+        ("A wedding", "$7,122",
+         ["12 hours, several locations", "Second photographer",
+          "150 images and a 20-page album"]),
+        ("A product lookbook", "$11,032",
+         ["A studio day with models and a stylist",
+          "80 images, advanced retouch, cutouts",
+          "Paid advertising, national, one year"]),
+    ],
+    "videography": [
+        ("A testimonial", "$4,017",
+         ["5 hours at your office", "Two to three minutes finished",
+          "Simple edit, library music, subtitles"]),
+        ("A brand film", "$12,969",
+         ["One full day on location", "Gimbal and full lighting",
+          "Polished grade, two social cutdowns"]),
+        ("A two-day commercial", "$41,976",
+         ["Aerials, second camera, a presenter", "Two 30-second films",
+          "Cinematic grade and original music"]),
+    ],
+    "web-design": [
+        ("A one-page site", "$10,206",
+         ["Single landing page in Webflow", "You write the copy",
+          "Basic SEO and analytics"]),
+        ("A brochure site", "$58,407",
+         ["14 pages from 7 layouts, WordPress", "Blog, search, WCAG 2.2 AA",
+          "Three integrations, we polish your copy"]),
+        ("An online store", "$39,968",
+         ["Shopify, 60 products", "We write the copy",
+          "Payments, mailing list, reviews"]),
+    ],
+    "audio": [
+        ("A radio ad", "$2,275",
+         ["30 seconds, one cast voice", "Two studio hours",
+          "Library music, one-week turnaround"]),
+        ("A ten-part podcast", "$23,240",
+         ["400 minutes across ten episodes", "20 studio hours with an engineer",
+          "Transcripts, markers, branded intro", "Works out at $2,324 an episode"]),
+        ("Score for a short film", "$62,706",
+         ["15 minutes, three session players", "Fully designed sound and foley",
+          "Original music, cinema release"]),
+    ],
+}
+
+
+def example_markup(slug):
+    out = []
+    for name, price, bullets in EXAMPLES[slug]:
+        items = "\n".join(
+            '          <li>%s</li>' % b for b in bullets)
+        out.append(
+            '        <li class="pgx__card">\n'
+            '          <p class="pgx__name">%s</p>\n'
+            '          <p class="pgx__price">%s</p>\n'
+            '          <ul class="pgx__lines">\n%s\n          </ul>\n'
+            '        </li>' % (name, price, items))
+    return "\n".join(out)
+
+
 # The fields Netlify stores. Everything else rides inside `summary`.
 NETLIFY_FIELDS = [
     "service", "client_name", "client_email", "client_phone", "client_company",
@@ -142,6 +210,17 @@ TEMPLATE = """<!DOCTYPE html>
       </noscript>
     </div>
 
+    <section class="pgx" aria-labelledby="pgx-title">
+      <h3 class="pgx__title" id="pgx-title">What this usually costs</h3>
+      <p class="pgx__note">Three jobs we have priced, so you have something to
+      measure your own against before you start.</p>
+      <ul class="pgx__grid">
+{example_cards}
+      </ul>
+      <p class="pgx__foot">Each is the middle of three options, and assumes a
+      comfortable deadline. Your own answers above will move it.</p>
+    </section>
+
     <form id="pg-form" name="proposal" method="POST" data-netlify="true"
           netlify-honeypot="bot-field" hidden>
       <input type="hidden" name="form-name" value="proposal">
@@ -191,6 +270,7 @@ for slug, key, num, kind, title, pg_config in SERVICES:
         pitch_note=pitch_note,
         pg_config=pg_config,
         netlify_fields=netlify_fields,
+        example_cards=example_markup(slug),
     )
 
     outdir = os.path.join(ROOT, slug)
