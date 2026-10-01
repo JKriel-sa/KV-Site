@@ -1,0 +1,423 @@
+/* ==========================================================================
+   Kriel Ventures — v2 shell
+   Layers on top of styles.css. Same tokens (--ink, --bone, --tan, --display,
+   --ui, --edge, --ease), same chrome (menu button, opening mark). Everything
+   new is prefixed .kv- so it can be lifted into the live site section by
+   section without touching what is already there.
+
+   The one idea: a frame. A photograph sits in a photo frame, a film in a film
+   frame, a website in a browser frame. Each service is shown as the thing it
+   produces, and the warm accent (--tan) is spent only on the frame corners,
+   the live dot and the one button that matters.
+   ========================================================================== */
+
+:root {
+  --tan-deep: #B98D5E;          /* tan at 4.6:1 on ink, for small text */
+  --ink-2: #141414;             /* a surface one step up from ink */
+  --bone-2: #E6E2D9;            /* a surface one step down from bone */
+  --rule-dark: rgba(242, 239, 232, 0.14);
+  --rule-light: rgba(11, 11, 11, 0.14);
+  --measure: 58ch;
+}
+
+/* Service accent colours from styles.css are retired in the shell: three of
+   the four are unreadable at text size. One accent, used sparingly. */
+[data-key] { --accent: var(--tan); }
+
+/* --- Common ---------------------------------------------------------------- */
+.kv-section {
+  padding: clamp(3.5rem, 9vh, 7rem) var(--edge);
+}
+.kv-section--dark  { background: var(--ink);  color: var(--bone); }
+.kv-section--bone  { background: var(--bone); color: var(--ink); }
+.kv-section--bone2 { background: var(--bone-2); color: var(--ink); }
+
+.kv-wrap { max-width: 78rem; margin-inline: auto; }
+
+.kv-h2 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(2rem, 1rem + 4.2vw, 4.6rem);
+  line-height: 1.06;
+  letter-spacing: 0.012em;
+  max-width: 24ch;
+}
+.kv-h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(1.35rem, 1rem + 1.4vw, 2rem);
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
+.kv-lede {
+  max-width: var(--measure);
+  margin-top: 1.25rem;
+  font-size: clamp(1.05rem, 1rem + 0.4vw, 1.3rem);
+  line-height: 1.5;
+}
+.kv-section--dark .kv-lede { color: var(--bone); opacity: 0.86; }
+
+.kv-p { max-width: var(--measure); line-height: 1.55; }
+.kv-muted { color: var(--ink-soft); }
+.kv-section--bone .kv-muted,
+.kv-section--bone2 .kv-muted { color: #5F5C57; }
+
+/* Two-column heading row: heading left, lede right on wide screens. */
+.kv-head { display: grid; gap: 1.25rem 4rem; margin-bottom: clamp(2rem, 5vh, 3.5rem); }
+@media (min-width: 900px) {
+  .kv-head { grid-template-columns: 1.1fr 1fr; align-items: end; }
+  .kv-head .kv-lede { margin-top: 0; }
+}
+
+/* --- Buttons ---------------------------------------------------------------- */
+.kv-actions { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; margin-top: 2rem; }
+.kv-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 50px; padding: 0.7rem 1.5rem;
+  border-radius: 10px; border: 1px solid transparent;
+  font-family: var(--ui); font-weight: 700; font-size: 1.02rem; letter-spacing: -0.01em;
+  text-decoration: none; cursor: pointer;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.kv-btn--primary { background: var(--tan); color: var(--ink); }
+.kv-btn--primary:hover { background: #E8C79C; }
+.kv-btn--ghost { background: transparent; color: inherit; border-color: currentColor; }
+.kv-btn--ghost:hover { background: rgba(242, 239, 232, 0.08); }
+.kv-section--bone .kv-btn--ghost:hover,
+.kv-section--bone2 .kv-btn--ghost:hover { background: rgba(11, 11, 11, 0.06); }
+
+/* Plain text links inside sections: underlined, no arrows. */
+.kv-link { text-decoration: underline; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+.kv-link:hover { text-decoration-thickness: 2px; }
+
+/* --- Live dot: the studio is open for work -------------------------------- */
+.kv-live {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  font-family: var(--ui); font-weight: 700; font-size: 0.95rem; letter-spacing: -0.01em;
+}
+.kv-live::before {
+  content: ""; width: 0.6em; height: 0.6em; border-radius: 50%;
+  background: var(--tan); box-shadow: 0 0 0 0 rgba(217, 177, 131, 0.6);
+  animation: kv-pulse 2.4s var(--ease) infinite;
+}
+@keyframes kv-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(217, 177, 131, 0.55); }
+  70%  { box-shadow: 0 0 0 0.6em rgba(217, 177, 131, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 177, 131, 0); }
+}
+
+/* ==========================================================================
+   Hero (home): the opening from styles.css, with a photograph behind it and
+   the pitch underneath the line.
+   ========================================================================== */
+.kv-hero {
+  position: relative; isolation: isolate;
+  min-height: 92svh;
+  display: grid; grid-template-rows: auto 1fr auto;
+  padding: clamp(1.5rem, 2.6vw, 2.4rem) var(--edge) clamp(2.5rem, 6vh, 4rem);
+  color: var(--bone);
+}
+.kv-hero__img {
+  position: absolute; inset: 0; z-index: -2;
+  width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%;
+}
+.kv-hero__scrim {
+  position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(11,11,11,0.55) 0%, rgba(11,11,11,0.15) 30%, rgba(11,11,11,0.35) 60%, rgba(11,11,11,0.92) 100%);
+}
+.kv-hero .opening__line { max-width: 24ch; }
+.kv-hero__foot {
+  display: grid; gap: 1.5rem; align-items: end;
+  margin-top: 2.5rem;
+}
+@media (min-width: 900px) {
+  .kv-hero__foot { grid-template-columns: 1fr auto; }
+}
+.kv-hero__sub {
+  max-width: 44ch;
+  font-size: clamp(1.05rem, 1rem + 0.45vw, 1.35rem);
+  line-height: 1.5;
+}
+.kv-hero .kv-actions { margin-top: 1.25rem; }
+
+/* Viewfinder corners on the hero, drawn in the accent. */
+.kv-corners {
+  position: absolute; inset: clamp(1rem, 2vw, 1.75rem); z-index: 0; pointer-events: none;
+  --c: var(--tan); --l: 26px; --w: 2px;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--w) var(--l) no-repeat;
+}
+
+/* ==========================================================================
+   Why: three columns, each with a rule above. Columns, not cards.
+   ========================================================================== */
+.kv-why { display: grid; gap: 2rem; margin-top: clamp(2rem, 5vh, 3.5rem); }
+@media (min-width: 760px) { .kv-why { grid-template-columns: repeat(3, 1fr); gap: 2.5rem; } }
+.kv-why > div { border-top: 1px solid var(--ink); padding-top: 1.25rem; }
+.kv-why .kv-h3 { margin-bottom: 0.6rem; }
+.kv-why p { line-height: 1.5; }
+
+.kv-plain {
+  margin-top: clamp(2.5rem, 6vh, 4rem);
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule-light);
+  max-width: 64ch;
+  font-size: clamp(1.1rem, 1rem + 0.6vw, 1.5rem);
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+/* ==========================================================================
+   Frames: the memorable thing. Three aspect ratios, three kinds of chrome.
+   ========================================================================== */
+.kv-frames { display: grid; gap: clamp(2.5rem, 6vh, 4.5rem); }
+
+.kv-craft { display: grid; gap: 1.5rem; align-items: center; }
+@media (min-width: 900px) {
+  .kv-craft { grid-template-columns: 7fr 5fr; gap: 3.5rem; }
+  .kv-craft:nth-child(even) { grid-template-columns: 5fr 7fr; }
+  .kv-craft:nth-child(even) .kv-frame { order: 2; }
+}
+
+.kv-frame {
+  position: relative; isolation: isolate; overflow: hidden;
+  background: var(--ink-2);
+  border-radius: 4px;
+}
+.kv-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.kv-frame__pic { position: relative; }
+
+/* Photo: 3:2, exposure strip underneath like a contact-sheet edge. */
+.kv-frame--photo .kv-frame__pic { aspect-ratio: 3 / 2; }
+/* Film: 16:9, timecode bar above, letterbox below. */
+.kv-frame--film .kv-frame__pic { aspect-ratio: 16 / 9; }
+/* Web: a browser window; 16:10 viewport. */
+.kv-frame--web .kv-frame__pic { aspect-ratio: 16 / 10; }
+
+.kv-frame__bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.55rem 0.9rem;
+  font-family: var(--ui); font-weight: 500; font-size: 0.8rem; letter-spacing: 0.01em;
+  color: var(--bone);
+  font-variant-numeric: tabular-nums;
+  background: var(--ink-2);
+}
+.kv-frame__bar span + span { opacity: 0.7; }
+
+.kv-rec { display: inline-flex; align-items: center; gap: 0.45rem; }
+.kv-rec::before {
+  content: ""; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: #E5322D;
+  animation: kv-blink 1.2s steps(1) infinite;
+}
+@keyframes kv-blink { 50% { opacity: 0.25; } }
+
+.kv-dots { display: inline-flex; gap: 0.35rem; }
+.kv-dots i { width: 0.6rem; height: 0.6rem; border-radius: 50%; background: rgba(242,239,232,0.28); }
+.kv-url {
+  flex: 1; padding: 0.3rem 0.7rem; border-radius: 6px;
+  background: rgba(242,239,232,0.08); color: var(--bone); opacity: 0.85;
+  text-align: center;
+}
+
+/* Frame corners in tan: the viewfinder again, smaller. */
+.kv-frame__pic::after {
+  content: ""; position: absolute; inset: 0.75rem; pointer-events: none;
+  --c: var(--tan); --l: 18px; --w: 2px;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--w) var(--l) no-repeat;
+}
+.kv-frame--web .kv-frame__pic::after { display: none; }
+
+.kv-craft__text .kv-h2 { font-size: clamp(2rem, 1rem + 3.4vw, 3.8rem); }
+.kv-craft__text p { margin-top: 1rem; max-width: 40ch; line-height: 1.5; font-size: 1.05rem; opacity: 0.88; }
+.kv-craft__links { display: flex; flex-wrap: wrap; gap: 0.6rem 1.5rem; margin-top: 1.25rem; font-weight: 700; }
+
+/* ==========================================================================
+   Process: this is a real sequence, so it is numbered.
+   ========================================================================== */
+.kv-steps { display: grid; gap: 1.75rem; counter-reset: step; margin-top: clamp(2rem, 5vh, 3rem); }
+@media (min-width: 760px) { .kv-steps { grid-template-columns: repeat(4, 1fr); gap: 2rem; } }
+.kv-step { counter-increment: step; border-top: 1px solid var(--rule-light); padding-top: 1rem; }
+.kv-step::before {
+  content: counter(step);
+  display: block;
+  font-family: var(--display); font-size: 2.4rem; line-height: 1; color: var(--tan-deep);
+  margin-bottom: 0.75rem;
+}
+.kv-step .kv-h3 { font-family: var(--ui); font-weight: 700; font-size: 1.15rem; letter-spacing: -0.015em; margin-bottom: 0.4rem; }
+.kv-step p { line-height: 1.5; }
+
+/* ==========================================================================
+   About: a short column of text with a portrait frame beside it.
+   ========================================================================== */
+.kv-about { display: grid; gap: 2rem; align-items: center; }
+@media (min-width: 900px) { .kv-about { grid-template-columns: 5fr 7fr; gap: 4rem; } }
+.kv-portrait {
+  aspect-ratio: 4 / 5; border-radius: 4px; position: relative; overflow: hidden;
+  background: var(--ink-2); color: var(--bone);
+  display: grid; place-items: center; text-align: center; padding: 1.5rem;
+}
+.kv-portrait__note { font-size: 0.9rem; opacity: 0.6; max-width: 20ch; }
+.kv-portrait::after {
+  content: ""; position: absolute; inset: 0.75rem; pointer-events: none;
+  --c: var(--tan); --l: 18px; --w: 2px;
+  background:
+    linear-gradient(var(--c), var(--c)) top left / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) top left / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) top right / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom left / var(--w) var(--l) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--l) var(--w) no-repeat,
+    linear-gradient(var(--c), var(--c)) bottom right / var(--w) var(--l) no-repeat;
+}
+.kv-about__text p + p { margin-top: 1rem; }
+.kv-sign { margin-top: 1.5rem; font-family: var(--display); font-size: 1.5rem; letter-spacing: 0.03em; }
+
+/* ==========================================================================
+   Contact: two ways in.
+   ========================================================================== */
+.kv-contact { display: grid; gap: 2.5rem; margin-top: clamp(2rem, 5vh, 3rem); }
+@media (min-width: 900px) { .kv-contact { grid-template-columns: 1fr 1fr; gap: 4rem; } }
+.kv-contact__col { border-top: 1px solid var(--rule-dark); padding-top: 1.25rem; }
+.kv-contact__col .kv-h3 { margin-bottom: 0.75rem; }
+.kv-contact__list { display: grid; gap: 0.35rem; margin-top: 1rem; font-weight: 700; font-size: 1.1rem; }
+.kv-contact__list a { text-decoration: none; }
+.kv-contact__list a:hover { color: var(--tan); }
+.kv-email {
+  display: inline-block; margin-top: 0.75rem;
+  font-family: var(--display); font-size: clamp(1.6rem, 1rem + 2.6vw, 3rem); letter-spacing: 0.02em;
+  text-decoration: none; color: var(--bone);
+  border-bottom: 2px solid var(--tan); padding-bottom: 0.1em;
+}
+.kv-email:hover { color: var(--tan); }
+.kv-social { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; margin-top: 1.5rem; color: var(--ink-soft); }
+.kv-social a { text-decoration: none; }
+.kv-social a:hover { color: var(--bone); }
+
+/* ==========================================================================
+   Service pages
+   ========================================================================== */
+.kv-svc-hero {
+  background: var(--ink); color: var(--bone);
+  padding: clamp(1.5rem, 2.6vw, 2.4rem) var(--edge) clamp(2.5rem, 6vh, 4rem);
+  display: grid; gap: clamp(1.5rem, 4vh, 2.5rem);
+}
+.kv-svc-hero__grid { display: grid; gap: 2rem; align-items: end; }
+@media (min-width: 900px) { .kv-svc-hero__grid { grid-template-columns: 1fr 1fr; gap: 3rem; } }
+.kv-svc-hero__title {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(2.6rem, 1rem + 7vw, 7.5rem); line-height: 1.02; letter-spacing: 0.012em;
+}
+.kv-svc-hero__pitch {
+  max-width: 44ch; margin-top: 1.25rem;
+  font-size: clamp(1.1rem, 1rem + 0.5vw, 1.4rem); line-height: 1.45;
+}
+
+.kv-list { display: grid; gap: 0; margin-top: clamp(1.5rem, 4vh, 2.5rem); }
+.kv-list > div {
+  display: grid; gap: 0.35rem 2rem; padding: 1.25rem 0;
+  border-top: 1px solid var(--rule-light);
+}
+.kv-list > div:last-child { border-bottom: 1px solid var(--rule-light); }
+@media (min-width: 760px) { .kv-list > div { grid-template-columns: 1fr 2fr; } }
+.kv-list .kv-h3 { font-family: var(--ui); font-weight: 700; font-size: 1.2rem; letter-spacing: -0.015em; }
+.kv-list p { line-height: 1.5; max-width: 52ch; }
+
+/* Example prices: three columns on dark, numbers in Stadium. */
+.kv-prices { display: grid; gap: 1.5rem; margin-top: clamp(2rem, 5vh, 3rem); }
+@media (min-width: 760px) { .kv-prices { grid-template-columns: repeat(3, 1fr); gap: 2rem; } }
+.kv-price { border-top: 1px solid var(--rule-dark); padding-top: 1.25rem; }
+.kv-price__name { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.015em; }
+.kv-price__num {
+  font-family: var(--display); font-size: clamp(2.2rem, 1rem + 2.6vw, 3.4rem); line-height: 1.1;
+  color: var(--tan); margin: 0.5rem 0 0.9rem;
+}
+.kv-price ul { display: grid; gap: 0.3rem; color: var(--bone); opacity: 0.8; }
+.kv-price li { padding-left: 1rem; position: relative; }
+.kv-price li::before { content: ""; position: absolute; left: 0; top: 0.72em; width: 0.4rem; height: 1px; background: var(--tan); }
+.kv-prices-foot { margin-top: 1.75rem; max-width: 60ch; color: var(--ink-soft); line-height: 1.5; }
+
+/* Estimator placeholder: an honest stand-in for the live generator. */
+.kv-est {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  border: 1px dashed rgba(217, 177, 131, 0.55); border-radius: 10px;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  display: grid; gap: 1rem;
+  max-width: 54rem;
+}
+.kv-est__bar { height: 4px; border-radius: 2px; background: rgba(242,239,232,0.12); overflow: hidden; }
+.kv-est__bar i { display: block; height: 100%; width: 22%; background: var(--tan); }
+.kv-est__fields { display: grid; gap: 0.75rem; }
+@media (min-width: 640px) { .kv-est__fields { grid-template-columns: 1fr 1fr; } }
+.kv-est__field { display: grid; gap: 0.35rem; font-size: 0.92rem; }
+.kv-est__field span { font-weight: 700; }
+.kv-est__field i {
+  display: block; height: 46px; border-radius: 8px;
+  background: rgba(242,239,232,0.06); border: 1px solid rgba(242,239,232,0.16);
+}
+.kv-est__note { color: var(--tan-deep); font-size: 0.9rem; }
+
+/* ==========================================================================
+   Footer base
+   ========================================================================== */
+.kv-foot {
+  display: flex; justify-content: space-between; gap: 1rem 2rem; flex-wrap: wrap;
+  margin-top: clamp(3rem, 8vh, 5rem); padding-top: 1.25rem;
+  border-top: 1px solid var(--rule-dark);
+  font-size: 0.85rem; color: var(--ink-soft);
+}
+.kv-foot a { text-decoration: none; }
+.kv-foot a:hover { color: var(--bone); }
+
+/* ==========================================================================
+   Reduced motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .kv-live::before, .kv-rec::before { animation: none; }
+}
+
+/* ==========================================================================
+   Audio frame: a transport bar, the way the other three are a camera back,
+   a monitor and a browser. Picture on top, controls beneath, so it reads as
+   a deck rather than a photo with a caption.
+   ========================================================================== */
+.kv-frame--audio .kv-frame__pic { aspect-ratio: 3 / 2; }
+
+.kv-meter { display: inline-flex; align-items: flex-end; gap: 0.2rem; height: 0.8rem; }
+.kv-meter i {
+  width: 0.2rem;
+  background: var(--tan);
+  opacity: 0.85;
+}
+.kv-meter i:nth-child(1) { height: 35%; }
+.kv-meter i:nth-child(2) { height: 70%; }
+.kv-meter i:nth-child(3) { height: 100%; }
+.kv-meter i:nth-child(4) { height: 55%; }
+.kv-meter i:nth-child(5) { height: 25%; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .kv-meter i { animation: kv-level 1.4s ease-in-out infinite alternate; }
+  .kv-meter i:nth-child(2) { animation-delay: 0.18s; }
+  .kv-meter i:nth-child(3) { animation-delay: 0.36s; }
+  .kv-meter i:nth-child(4) { animation-delay: 0.1s; }
+  .kv-meter i:nth-child(5) { animation-delay: 0.28s; }
+}
+@keyframes kv-level { from { transform: scaleY(0.45); } to { transform: scaleY(1); } }
+.kv-meter i { transform-origin: bottom; }

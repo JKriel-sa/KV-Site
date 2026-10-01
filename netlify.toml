@@ -1,0 +1,27 @@
+# Kriel Ventures — Netlify configuration
+#
+# This folder IS the site. There is no build step: publish = "." means Netlify
+# serves these files as they are. Refresh them from the project root with
+# ./build.sh — never hand-edit the copies in here, or the next build wipes it.
+
+[build]
+  publish = "."
+  command = ""
+
+# ── Security headers ───────────────────────────────────────────────────────
+# Caching is deliberately left to Netlify. Its default (max-age=0 with ETags)
+# means a redeploy is live immediately and unchanged files still 304 — which
+# is what you want on a site whose photographs get swapped in place.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=(), interest-cohort=()"
+    # The hash below covers the one inline script in index.html:
+    #   document.documentElement.classList.add('js');
+    # If you edit that line, regenerate it or the reveal animations stop
+    # running (the page still works — everything just appears un-animated):
+    #   printf "%s" "<the script text>" | openssl dgst -sha256 -binary | openssl base64
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'sha256-/x7W7R75k8Roq0WaVRQX9blP4OufE5xbAdzklGxsgpw='; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; object-src 'none'"

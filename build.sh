@@ -12,7 +12,11 @@ cd "$(dirname "$0")"
 
 mkdir -p deploy/images deploy/fonts
 
-cp index.html styles.css main.js favicon.svg favicon.jpg deploy/
+cp index.html styles.css v2.css main.js favicon.svg favicon.jpg deploy/
+
+# Netlify config and robots live in source, not only in deploy/: they are
+# not generated, so anything that wipes deploy/ would lose them for good.
+cp netlify.toml robots.txt deploy/
 
 # Proposal generator: shared engine and styles, plus one config per service.
 # The service pages load pg-intake.js, their own config, then pg.js — in that

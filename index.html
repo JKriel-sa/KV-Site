@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kriel Ventures — Photography, Videography, Web Design, Audio</title>
-<meta name="description" content="Kriel Ventures is a four-part studio: photography, videography, web design and audio, made under one roof so the work stays consistent from the first frame to the last page.">
+<title>Kriel Ventures — Photography, Videography, Web Design & Audio, Austin</title>
+<meta name="description" content="A small, new studio in Austin making photography, film, websites and sound. High tech, high touch: the newest tools, and a real person on every job.">
 <meta name="theme-color" content="#0B0B0B">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon.jpg" type="image/jpeg" sizes="512x512">
 
 <!-- Social preview. Set og:url to the live domain once it's pointed. -->
 <meta property="og:type" content="website">
-<meta property="og:title" content="Kriel Ventures — Photography, Videography, Web Design, Audio">
-<meta property="og:description" content="Four crafts, one studio: photography, videography, web design and audio, made under one roof.">
+<meta property="og:title" content="Kriel Ventures — Photography, Videography, Web Design & Audio">
+<meta property="og:description" content="Four crafts, one studio, in Austin: photography, film, websites and sound.">
 <meta property="og:image" content="images/photography-2000.jpg">
 <meta name="twitter:card" content="summary_large_image">
 
@@ -21,15 +21,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="preload" href="fonts/stadium.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="v2.css">
 
 <!-- Reveal animations only exist if JS does; without it everything is simply visible. -->
 <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 
-<a class="skip-link" href="#work">Skip to the work</a>
+<a class="skip-link" href="#content">Skip to content</a>
 
-<!-- ── Fixed menu control ───────────────────────────────────────────── -->
 <button id="menu-toggle" class="menu-btn" aria-expanded="false" aria-controls="site-menu">
   <span class="menu-btn__label" data-open="Menu" data-close="Close">Menu</span>
 </button>
@@ -38,11 +38,12 @@
   <div class="menu__inner">
     <p class="menu__eyebrow">Kriel Ventures</p>
     <ul class="menu__list">
-      <li><a href="photography/"><span class="menu__num">01</span>Photography</a></li>
-      <li><a href="videography/"><span class="menu__num">02</span>Videography</a></li>
-      <li><a href="web-design/"><span class="menu__num">03</span>Web Design</a></li>
-      <li><a href="audio/"><span class="menu__num">04</span>Audio</a></li>
-      <li><a href="#contact"><span class="menu__num">—</span>Contact</a></li>
+      <li><a href="./" aria-current="page">Home</a></li>
+      <li><a href="photography/">Photography</a></li>
+      <li><a href="videography/">Videography</a></li>
+      <li><a href="web-design/">Web design</a></li>
+      <li><a href="audio/">Audio</a></li>
+      <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="menu__foot">
       <a href="mailto:josh@kriel.us">josh@kriel.us</a>
@@ -50,125 +51,188 @@
   </div>
 </nav>
 
-<!-- ── Opening ──────────────────────────────────────────────────────── -->
-<header class="opening" id="top">
+<header class="kv-hero" id="top">
+  <img class="kv-hero__img" src="images/photography-2000.jpg"
+       srcset="images/photography-1200.jpg 1200w, images/photography-2000.jpg 2000w"
+       sizes="100vw" alt="" fetchpriority="high" decoding="async">
+  <div class="kv-hero__scrim" aria-hidden="true"></div>
+  <div class="kv-corners" aria-hidden="true"></div>
+
   <p class="opening__mark"><a href="./">Kriel Ventures</a></p>
 
-  <!-- Straight apostrophe on purpose: Stadium has no U+2019, and a curly one
-       would silently fall back to another face mid-word. -->
   <h1 class="opening__line">
     <span class="rise"><span>Let's create</span></span>
     <span class="rise"><span>something,</span></span>
     <span class="lift"><span class="glow"><em>together</em></span></span>
   </h1>
 
-  <p class="opening__sub">Photography, videography, web design and audio — four crafts, one studio.</p>
+  <div class="kv-hero__foot">
+    <div>
+      <p class="kv-hero__sub">Photography, film, web design and sound from a small, new studio in Austin. The newest tools in the bag, and a real person on the other end of every email.</p>
+      <div class="kv-actions">
+        <a class="kv-btn kv-btn--primary" href="#contact">Get an estimate</a>
+        <a class="kv-btn kv-btn--ghost" href="#work">See what we make</a>
+      </div>
+    </div>
+    <p class="kv-live">Open for projects</p>
+  </div>
 </header>
 
-<!-- ── The work ─────────────────────────────────────────────────────── -->
-<main id="work">
-  <h2 class="visually-hidden">What we make</h2>
+<main id="content">
 
-  <ol class="panes">
+<section class="kv-section kv-section--bone" id="why">
+  <div class="kv-wrap">
+    <div class="kv-head">
+      <h2 class="kv-h2">High tech. High touch.</h2>
+      <p class="kv-lede">An agency gives you an account manager. A template gives you nobody. We think there's a better middle: one studio that uses the newest tools to move fast, and still knows your name.</p>
+    </div>
+    <div class="kv-why">
+      <div>
+        <h3 class="kv-h3">Simple</h3>
+        <p>One brief, one person, one bill. You talk to the person doing the work, from the first call to the final file.</p>
+      </div>
+      <div>
+        <h3 class="kv-h3">Personal</h3>
+        <p>We learn how your business actually runs before we pick up a camera or open a code editor, so what we make fits the way you sell.</p>
+      </div>
+      <div>
+        <h3 class="kv-h3">Current</h3>
+        <p>AI-assisted editing, a modern web stack, and a price you can see before you ever talk to us. The technology goes into the work. The relationship stays human.</p>
+      </div>
+    </div>
+    <p class="kv-plain">We're a startup. That means you get the founder on every job, the newest tools without the agency overhead, and a studio that works hard because it still has something to prove.</p>
+  </div>
+</section>
 
-      <li class="pane" id="photography" data-key="photography">
-        <img class="pane__img" src="images/photography-1200.jpg"
-             srcset="images/photography-1200.jpg 1200w, images/photography-2000.jpg 2000w"
-             sizes="(min-width: 760px) 50vw, 100vw"
-             alt="A photographer framing a shot from a rocky outcrop above a valley filled with low cloud."
-             fetchpriority="high" decoding="async">
-        <div class="pane__scrim" aria-hidden="true"></div>
-        <div class="pane__text">
-          <p class="pane__label"><span>Service 01</span><span>Stills</span></p>
-          <h3 class="pane__title"><a href="photography/"><span class="rise"><span>Photography</span></span></a></h3>
-          <p class="pane__note">Editorial portraits, product sets and event coverage — shot, selected and graded in house.</p>
+<section class="kv-section kv-section--dark" id="work">
+  <div class="kv-wrap">
+    <div class="kv-head">
+      <h2 class="kv-h2">Four crafts, one studio.</h2>
+      <p class="kv-lede">Most projects need more than one. A site is only as good as its photography; a launch needs a film, the stills from the same day, and something for it to sound like. Doing all four under one roof keeps the work consistent, and keeps you out of the middle.</p>
+    </div>
+    <div class="kv-frames">
+      <article class="kv-craft" data-key="photography">
+        <div class="kv-frame kv-frame--photo">
+  <div class="kv-frame__pic"><img src="images/photography-1200.jpg" srcset="images/photography-1200.jpg 1200w, images/photography-2000.jpg 2000w" sizes="(min-width: 900px) 55vw, 100vw" alt="" loading="lazy" decoding="async"></div>
+  <div class="kv-frame__bar"><span>RAW</span><span>f/2.8&nbsp;&nbsp;1/250&nbsp;&nbsp;ISO 200</span><span>35mm</span></div>
+</div>
+        <div class="kv-craft__text">
+          <h3 class="kv-h2">Photography</h3>
+          <p>Headshots, products, events and brand imagery, shot and finished in house.</p>
+          <div class="kv-craft__links">
+            <a class="kv-link" href="photography/">About photography</a>
+            <a class="kv-link" href="photography/#estimate">Price a project</a>
+          </div>
         </div>
-      </li>
-
-      <li class="pane" id="videography" data-key="videography">
-        <img class="pane__img" src="images/videography-1200.jpg"
-             srcset="images/videography-1200.jpg 1200w, images/videography-2000.jpg 2000w"
-             sizes="(min-width: 760px) 50vw, 100vw"
-             alt="A film projector throwing a beam of light through haze in a darkened room."
-             loading="lazy" decoding="async">
-        <div class="pane__scrim" aria-hidden="true"></div>
-        <div class="pane__text">
-          <p class="pane__label"><span>Service 02</span><span>Motion</span></p>
-          <h3 class="pane__title"><a href="videography/"><span class="rise"><span>Videography</span></span></a></h3>
-          <p class="pane__note">Brand films, interviews and event recaps — directed, filmed and cut from a single brief.</p>
+      </article>
+      <article class="kv-craft" data-key="videography">
+        <div class="kv-frame kv-frame--film">
+  <div class="kv-frame__bar"><span class="kv-rec">REC</span><span>00:00:12:04</span><span>24fps</span></div>
+  <div class="kv-frame__pic"><img src="images/videography-1200.jpg" srcset="images/videography-1200.jpg 1200w, images/videography-2000.jpg 2000w" sizes="(min-width: 900px) 55vw, 100vw" alt="" loading="lazy" decoding="async"></div>
+</div>
+        <div class="kv-craft__text">
+          <h3 class="kv-h2">Videography</h3>
+          <p>Brand films, testimonials and event recaps, directed, filmed and cut from one brief.</p>
+          <div class="kv-craft__links">
+            <a class="kv-link" href="videography/">About videography</a>
+            <a class="kv-link" href="videography/#estimate">Price a project</a>
+          </div>
         </div>
-      </li>
-
-      <li class="pane" id="web-design" data-key="web">
-        <img class="pane__img" src="images/webdesign-1200.jpg"
-             srcset="images/webdesign-1200.jpg 1200w, images/webdesign-2000.jpg 2000w"
-             sizes="(min-width: 760px) 50vw, 100vw"
-             alt="A laptop screen showing a page of HTML in a dark code editor."
-             loading="lazy" decoding="async">
-        <div class="pane__scrim" aria-hidden="true"></div>
-        <div class="pane__text">
-          <p class="pane__label"><span>Service 03</span><span>Digital</span></p>
-          <h3 class="pane__title"><a href="web-design/"><span class="rise"><span>Web Design</span></span></a></h3>
-          <p class="pane__note">Sites built up from the photography — fast, responsive, and simple to keep updating.</p>
+      </article>
+      <article class="kv-craft" data-key="web">
+        <div class="kv-frame kv-frame--web">
+  <div class="kv-frame__bar"><span class="kv-dots"><i></i><i></i><i></i></span><span class="kv-url">yourbusiness.com</span><span>0.4s</span></div>
+  <div class="kv-frame__pic"><img src="images/webdesign-1200.jpg" srcset="images/webdesign-1200.jpg 1200w, images/webdesign-2000.jpg 2000w" sizes="(min-width: 900px) 55vw, 100vw" alt="" loading="lazy" decoding="async"></div>
+</div>
+        <div class="kv-craft__text">
+          <h3 class="kv-h2">Web design</h3>
+          <p>Fast, hand-built sites that run on your photography, hosted and kept current by us.</p>
+          <div class="kv-craft__links">
+            <a class="kv-link" href="web-design/">About web design</a>
+            <a class="kv-link" href="web-design/#estimate">Price a project</a>
+          </div>
         </div>
-      </li>
-
-      <li class="pane" id="audio" data-key="audio">
-        <img class="pane__img" src="images/audio-1200.jpg"
-             srcset="images/audio-1200.jpg 1200w, images/audio-2000.jpg 2000w"
-             sizes="(min-width: 760px) 50vw, 100vw"
-             alt="A vocal microphone lit from behind in a darkened room."
-             loading="lazy" decoding="async">
-        <div class="pane__scrim" aria-hidden="true"></div>
-        <div class="pane__text">
-          <p class="pane__label"><span>Service 04</span><span>Sound</span></p>
-          <h3 class="pane__title"><a href="audio/"><span class="rise"><span>Audio</span></span></a></h3>
-          <p class="pane__note">Recording, mixing and mastering — podcasts, voiceover and original score.</p>
+      </article>
+      <article class="kv-craft" data-key="audio">
+        <div class="kv-frame kv-frame--audio">
+  <div class="kv-frame__pic"><img src="images/audio-1200.jpg" srcset="images/audio-1200.jpg 1200w, images/audio-2000.jpg 2000w" sizes="(min-width: 900px) 55vw, 100vw" alt="" loading="lazy" decoding="async"></div>
+  <div class="kv-frame__bar"><span>WAV</span><span>48kHz&nbsp;&nbsp;24-bit</span><span class="kv-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></div>
+</div>
+        <div class="kv-craft__text">
+          <h3 class="kv-h2">Audio</h3>
+          <p>Recording, mixing and mastering for podcasts, voiceover and original score.</p>
+          <div class="kv-craft__links">
+            <a class="kv-link" href="audio/">About audio</a>
+            <a class="kv-link" href="audio/#estimate">Price a project</a>
+          </div>
         </div>
-      </li>
+      </article>
+    </div>
+  </div>
+</section>
 
-  </ol>
+<section class="kv-section kv-section--bone2" id="how">
+  <div class="kv-wrap">
+    <div class="kv-head">
+      <h2 class="kv-h2">How it works.</h2>
+      <p class="kv-lede">Four steps, no mystery. You'll know the price before the first call and the schedule before the first shoot.</p>
+    </div>
+    <ol class="kv-steps">
+      <li class="kv-step"><h3 class="kv-h3">Price it</h3><p>Answer a few questions on the service page and get a costed estimate in about three minutes. No call required.</p></li>
+      <li class="kv-step"><h3 class="kv-h3">Talk to Josh</h3><p>A short call to check the fit, settle the details and put a date in the diary.</p></li>
+      <li class="kv-step"><h3 class="kv-h3">We make it</h3><p>Shoot days, edits and builds run on a schedule you can see, with one round of notes built in.</p></li>
+      <li class="kv-step"><h3 class="kv-h3">We stay on</h3><p>Files you own, a site we keep running, and someone to call when you need the next thing.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="kv-section kv-section--bone" id="about">
+  <div class="kv-wrap kv-about">
+    <div class="kv-portrait">
+      <p class="kv-portrait__note">Portrait of Josh goes here, shot the way we'd shoot a client.</p>
+    </div>
+    <div class="kv-about__text">
+      <h2 class="kv-h2">A person, not a portal.</h2>
+      <p class="kv-lede">Kriel Ventures is the studio of Josh Kriel, a photographer, filmmaker and web designer in Austin, Texas.</p>
+      <p class="kv-p">It started in 2026 because the businesses Josh liked most were being served worst: too small for an agency, too good for a template. The idea is simple. Use the best tools available to do more with a small team, and spend what that saves on actually knowing the client.</p>
+      <p class="kv-p">New studio, bold ambitions, and the work ethic to back it. If you're building something and want a partner who'll treat it like their own, let's talk.</p>
+      <p class="kv-sign">Josh Kriel</p>
+    </div>
+  </div>
+</section>
+
 </main>
 
-<!-- ── Footer ───────────────────────────────────────────────────────── -->
-<footer class="footer" id="contact">
-  <div class="footer__grid">
-
-    <div class="footer__col">
-      <h2 class="footer__head">Contact</h2>
-      <p class="footer__block">
-        Kriel Ventures<br>
-        <a href="mailto:josh@kriel.us">josh@kriel.us</a>
-      </p>
+<section class="kv-section kv-section--dark" id="contact">
+  <div class="kv-wrap">
+    <h2 class="kv-h2">Start with a number, or a conversation.</h2>
+    <div class="kv-contact">
+      <div class="kv-contact__col">
+        <h3 class="kv-h3">Price it yourself</h3>
+        <p class="kv-p">Each service has an estimator. Answer a few questions and get a costed range in about three minutes, before you've talked to anyone.</p>
+        <div class="kv-contact__list">
+      <a href="photography/#estimate">Photography</a>
+      <a href="videography/#estimate">Videography</a>
+      <a href="web-design/#estimate">Web design</a>
+      <a href="audio/#estimate">Audio</a>
+        </div>
+      </div>
+      <div class="kv-contact__col">
+        <h3 class="kv-h3">Or just write</h3>
+        <p class="kv-p">Tell us what you're building. A person reads it, and a person replies.</p>
+        <a class="kv-email" href="mailto:josh@kriel.us">josh@kriel.us</a>
+        <div class="kv-social">
+          <a href="https://www.instagram.com/jkriel_/" target="_blank" rel="noopener noreferrer">Instagram</a>
+          <a href="https://www.linkedin.com/in/josh-kriel-aaa353429/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </div>
+      </div>
     </div>
-
-    <div class="footer__col">
-      <h2 class="footer__head">Services</h2>
-      <ul class="footer__list">
-        <li><a href="photography/">Photography</a></li>
-        <li><a href="videography/">Videography</a></li>
-        <li><a href="web-design/">Web Design</a></li>
-        <li><a href="audio/">Audio</a></li>
-      </ul>
+    <div class="kv-foot">
+      <p>&copy; <span id="year">2026</span> Kriel Ventures, Austin, Texas</p>
+      <p><a href="#top">Back to top</a></p>
     </div>
-
-    <div class="footer__col">
-      <h2 class="footer__head">External links</h2>
-      <ul class="footer__list footer__list--muted">
-        <li><a href="https://www.instagram.com/jkriel_/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
-        <!-- No channel yet — kept in place, but plain text rather than a dead link. -->
-        <li class="footer__soon"><span>YouTube</span><span class="footer__soon-note">working on it</span></li>
-        <li><a href="https://www.linkedin.com/in/josh-kriel-aaa353429/" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-      </ul>
-    </div>
-
   </div>
-
-  <div class="footer__base">
-    <p>© <span id="year">2026</span> Kriel Ventures</p>
-    <p><a href="#top">Back to top</a></p>
-  </div>
-</footer>
+</section>
 
 <script src="main.js"></script>
 </body>

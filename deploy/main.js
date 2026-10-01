@@ -42,7 +42,7 @@
      headline is a worse outcome than a missed animation.
   ------------------------------------------------------------------------ */
   var targets = Array.prototype.slice.call(
-    document.querySelectorAll('.opening, .pane, .holding')
+    document.querySelectorAll('.opening, .pane, .holding, .kv-hero, .kv-svc-hero')
   );
   var ticking = false;
 
