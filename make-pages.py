@@ -102,7 +102,7 @@ TEMPLATE = """<!DOCTYPE html>
 </nav>
 
 <main class="holding" id="content" data-key="{key}">
-  <p class="opening__mark"><a href="../">Kriel Ventures</a></p>
+  <p class="opening__mark"><a href="../">&larr; Back to Kriel Ventures</a></p>
 
   <div class="holding__body">
     <p class="holding__label"><span>Service {num}</span><span>{kind}</span></p>
@@ -118,7 +118,6 @@ TEMPLATE = """<!DOCTYPE html>
   </div>
 
   <div class="holding__foot">
-    <a href="../">&larr; Back to Kriel Ventures</a>
     <a href="mailto:josh@kriel.us">josh@kriel.us</a>
   </div>
 </main>

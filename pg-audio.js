@@ -1,54 +1,44 @@
 /* ==========================================================================
    Proposal generator — Sound Design & Audio Recording
    Implements proposal-generators/04-sound-design/. Recording is priced per
-   hour, post per finished minute; the two are never blended, because a
+   hour, finishing per minute of finished audio. The two are never blended: a
    two-hour session almost never means two hours of work.
    ========================================================================== */
 (function () {
   'use strict';
 
   var R = {
-    STUDIO_HOUR: 150, ENGINEER_HOUR: 110, STUDIO_DAY: 950, LIVE_ROOM: 75,
-    REMOTE_HOUR: 90, FIELD_HOUR: 165, DIRECTION_HOUR: 125,
-    TALENT_SESSION: 450, MUSICIAN_SESSION: 400,
-    /* Dense audio — scored picture, commercials, foley, music. Every finished
-       minute is worked densely, so per-minute is the right unit. */
-    EDIT: { light_topntail: 25, standard_dialogue_edit: 55,
-            heavy_narrative_edit: 110, full_story_edit: 190 },
-    CLEAN: { standard: 20, heavy_restoration: 75 },
-    MIX: { stereo_mix: 70, stem_mix: 110, surround_51: 220 },
-    MASTER: 45, MASTER_EXTRA: 20,
+    STUDIO_HOUR: 150, ENGINEER_HOUR: 110, STUDIO_DAY: 950,
+    FIELD_HOUR: 165, TALENT_SESSION: 450, MUSICIAN_SESSION: 400,
 
-    /* Long-form speech — podcasts, audiobooks, VO. The same per-minute rates
-       are badly wrong here: cost scales sub-linearly with runtime because a
-       40-minute interview is not forty minutes of dense work. Mixing and
-       mastering in particular are set up once per episode and then largely
-       ride, so they're priced per piece rather than per minute. Without this
-       split the generator quoted $28,000 to mix a ten-episode podcast. */
-    EDIT_SPOKEN: { light_topntail: 4, standard_dialogue_edit: 8,
-                   heavy_narrative_edit: 18, full_story_edit: 35 },
-    CLEAN_SPOKEN: { standard: 3, heavy_restoration: 10 },
-    MIX_PIECE: { stereo_mix: 150, stem_mix: 260, surround_51: 500 },
-    MASTER_PIECE: 80, MASTER_PIECE_EXTRA: 35,
-    SFX_EACH: 65, SFX_BED_MIN: 90, FOLEY_MIN: 260, ADR_LINE: 35,
+    /* Dense audio — scored picture, ads, foley. Every finished minute is
+       worked densely, so the minute is the right unit. */
+    EDIT:  { light: 25, standard: 55, heavy: 110 },
+    CLEAN: { standard: 20, heavy: 75 },
+    MIX:   { stereo: 70, stem: 110 },
+    MASTER: 45,
+
+    /* Long-form speech — podcasts, audiobooks, VO. A separate curve, not a
+       discount on the one above: cost scales sub-linearly with runtime, and
+       mixing and mastering are set up once per episode and then largely ride.
+       Without this split the generator quoted $28,000 to mix a ten-part show. */
+    EDIT_SPOKEN:  { light: 4, standard: 8, heavy: 18 },
+    CLEAN_SPOKEN: { standard: 3, heavy: 10 },
+    MIX_PIECE:    { stereo: 150, stem: 260 },
+    MASTER_PIECE: 80,
+
+    SFX_EACH: 65, SFX_BED_MIN: 90, FOLEY_MIN: 260,
     MUSIC_ORIG_MIN: 900, MUSIC_LIB: 220,
     INTRO_OUTRO: 750, SONIC_LOGO: 2200,
-    ALT_VERSION_MIN: 25, STEMS: 150, TRANSCRIPT_MIN: 4, SHOW_NOTES: 90,
-    MARKERS: 40, REVISION: 250, PUBLISH: 120,
-    MILEAGE: 0.85, PER_DIEM: 90
+    STEMS: 150, TRANSCRIPT_MIN: 4, SHOW_NOTES: 90, MARKERS: 40,
+    REVISION: 250, PUBLISH: 120, MILEAGE: 0.85, PER_DIEM: 90
   };
 
-  /* Long-form spoken work. See the rate card above for why these are priced on
-     a different curve from dense audio. */
   var SPOKEN = ['podcast_series', 'podcast_single', 'audiobook', 'voiceover',
                 'live_event_recording'];
   function isSpoken(s) { return SPOKEN.indexOf(s.audio_project_type) !== -1; }
-
-  /* The recording section only makes sense if there's nothing recorded yet. */
-  function needsRecording(s) { return s.source_material_state === 'nothing_yet'; }
-  function isSeries(s) {
-    return s.audio_project_type === 'podcast_series' || (parseFloat(s.deliverable_count) > 4);
-  }
+  function needsRecording(s) { return s.source_state === 'nothing_yet'; }
+  function isSeries(s) { return s.audio_project_type === 'podcast_series'; }
 
   window.PG_CONFIG = {
     service: 'Sound Design & Audio',
@@ -58,459 +48,360 @@
     sections: [
       window.PG_INTAKE,
 
-      { title: 'What we\'re making', short: 'Project',
+      { title: 'The project', short: 'Project',
         fields: [
-          { id: 'audio_project_type', label: 'Project type', type: 'select', req: 1,
-            opts: [['podcast_series', 'Podcast series'], ['podcast_single', 'Single episode'],
-                   ['voiceover', 'Voiceover'], ['audiobook', 'Audiobook'],
-                   ['music_recording', 'Music recording'], ['film_scoring', 'Film scoring'],
+          { id: 'audio_project_type', label: 'What are we making?', type: 'select', req: 1,
+            opts: [['podcast_series', 'A podcast series'],
+                   ['podcast_single', 'A single episode'],
+                   ['audiobook', 'An audiobook'],
+                   ['voiceover', 'Voiceover'],
+                   ['music_recording', 'A music recording'],
+                   ['film_scoring', 'Music for film or video'],
                    ['sound_design_post', 'Sound design for picture'],
-                   ['mixing_only', 'Mixing only'], ['mastering_only', 'Mastering only'],
-                   ['audio_restoration', 'Restoration / rescue'],
-                   ['audio_branding_sonic_logo', 'Sonic branding'],
-                   ['live_event_recording', 'Live event recording'],
+                   ['mixing_only', 'Mixing only'],
+                   ['mastering_only', 'Mastering only'],
+                   ['audio_restoration', 'Rescuing rough recordings'],
+                   ['audio_branding_sonic_logo', 'A sonic logo or audio brand'],
                    ['other', 'Something else']] },
-          { id: 'project_description', label: 'Describe it', type: 'textarea', req: 1,
-            rows: 3 },
-          { id: 'total_runtime_min', label: 'Total finished runtime (minutes)',
-            type: 'number', req: 1, half: 1, min: 1, unsure: 1,
-            help: 'Across everything — all episodes, tracks or cues together.' },
-          { id: 'deliverable_count', label: 'Number of separate pieces', type: 'number',
-            req: 1, half: 1, min: 1, placeholder: '1',
-            help: 'Episodes, tracks, cues or spots.' },
-          { id: 'source_material_state', label: 'What do you have already?',
-            type: 'select', req: 1,
+
+          { id: 'runtime_band', label: 'How much finished audio, in total?',
+            type: 'select', req: 1, half: 1, unsure: 1,
+            opts: [['2', 'A minute or two'],
+                   ['15', 'Around 15 minutes'],
+                   ['40', 'Around 40 minutes'],
+                   ['180', 'Several hours worth'],
+                   ['400', 'A full series — six hours or more']] },
+
+          { id: 'piece_count', label: 'How many separate pieces?', type: 'select',
+            req: 1, half: 1,
+            help: 'Episodes, tracks, cues or spots.',
+            opts: [['1', 'Just the one'], ['3', 'Two or three'],
+                   ['6', 'Four to eight'], ['10', 'Ten'], ['20', 'Twenty or more']] },
+
+          { id: 'source_state', label: 'What do you have already?', type: 'select', req: 1,
             opts: [['nothing_yet', 'Nothing yet — we need to record'],
                    ['raw_recordings', 'Raw recordings'],
                    ['edited_needs_mix', 'Edited, needs mixing'],
                    ['mixed_needs_master', 'Mixed, needs mastering'],
-                   ['poor_quality_needs_rescue', 'Recordings, but they\'re rough']] },
-          { id: 'reference_links', label: 'Reference audio', type: 'textarea', rows: 2 },
+                   ['poor_quality_needs_rescue', 'Recordings, but they are rough']] },
 
-          /* --- Series --- */
-          { id: 'episode_count', label: 'Episodes in this commitment', type: 'number',
-            req: 1, half: 1, min: 1, when: isSeries },
-          { id: 'cadence', label: 'Release cadence', type: 'select', req: 1, half: 1,
-            when: isSeries,
-            opts: [['weekly', 'Weekly'], ['biweekly', 'Fortnightly'],
-                   ['monthly', 'Monthly'], ['seasonal_batch', 'In seasonal batches']] },
-          { id: 'season_or_ongoing', label: 'Commitment shape', type: 'select', req: 1,
-            half: 1, when: isSeries,
-            opts: [['one_season', 'One season'], ['ongoing_retainer', 'Ongoing retainer'],
-                   ['pilot_only', 'A pilot first']] },
-          { id: 'host_count', label: 'Number of hosts', type: 'number', half: 1,
-            when: isSeries },
-          { id: 'remote_recording', label: 'How are hosts and guests recorded?',
-            type: 'select', req: 1, half: 1, when: isSeries,
-            opts: [['all_in_studio', 'All in studio'], ['all_remote', 'All remote'],
-                   ['hybrid', 'A mix']] }
+          { id: 'remote_recording', label: 'How are people recorded?', type: 'select',
+            half: 1, when: isSpoken,
+            opts: [['all_in_studio', 'All in one room'],
+                   ['hybrid', 'Some remote'],
+                   ['all_remote', 'All remote']] }
         ] },
 
       { title: 'Recording', short: 'Recording',
-        note: 'Priced by the hour. If you already have the audio, this section ' +
-              'is skipped entirely.',
+        note: 'Priced by the hour. Skipped entirely if you already have the audio.',
         fields: [
-          { id: 'studio_required', label: 'Where are we recording?', type: 'select',
-            req: 1, half: 1, when: needsRecording,
-            opts: [['our_studio', 'Your studio'], ['client_location', 'Our location'],
-                   ['remote_direction', 'Remotely, with you directing'],
-                   ['none_client_records', 'We\'ll record it ourselves']] },
-          { id: 'studio_hours', label: 'Studio hours needed', type: 'number', half: 1,
-            min: 1, unsure: 1, when: needsRecording },
-          { id: 'session_count', label: 'Number of separate sessions', type: 'number',
-            half: 1, min: 1, placeholder: '1', when: needsRecording },
-          { id: 'engineer_required', label: 'Recording engineer', type: 'select',
-            req: 1, half: 1, when: needsRecording,
-            opts: [['yes', 'Yes'], ['self_serve_room', 'Just the room']] },
-          { id: 'direction_required', label: 'Session direction or producing',
-            type: 'bool', when: needsRecording },
-          { id: 'talent_needed', label: 'Voice talent', type: 'select', req: 1, half: 1,
-            when: needsRecording,
-            opts: [['none', 'None'], ['client_provides', 'We\'ll provide it'],
-                   ['we_cast', 'Please cast for us']] },
-          { id: 'talent_count', label: 'How many voices?', type: 'number', half: 1,
-            when: function (s) { return needsRecording(s) && s.talent_needed === 'we_cast'; } },
-          { id: 'talent_usage_buyout', label: 'Talent usage buyout needed', type: 'bool',
-            when: function (s) { return needsRecording(s) && s.talent_needed && s.talent_needed !== 'none'; } },
-          { id: 'musicians_count', label: 'Session musicians needed', type: 'number',
-            half: 1, when: needsRecording },
-          { id: 'live_room_needed', label: 'Live room or drum room required', type: 'bool',
-            when: needsRecording },
-          { id: 'on_location_recording', label: 'Field or location recording', type: 'bool',
-            when: needsRecording },
-          { id: 'travel_distance_km', label: 'Distance from studio (km)', type: 'number',
-            half: 1, unsure: 1,
-            when: function (s) { return needsRecording(s) && s.on_location_recording === true; } }
+          { id: 'studio_band', label: 'How much studio time?', type: 'select', req: 1,
+            half: 1, unsure: 1, when: needsRecording,
+            opts: [['2', 'An hour or two'],
+                   ['4', 'Half a day'],
+                   ['8', 'A full day'],
+                   ['20', 'Several sessions'],
+                   ['40', 'A lot — a full series']] },
+
+          { id: 'recording_extras', label: 'Does the session need any of these?',
+            type: 'multi', when: needsRecording,
+            opts: [['engineer', 'An engineer running the session'],
+                   ['direction', 'Someone directing or producing'],
+                   ['talent', 'Voice talent we cast'],
+                   ['musicians', 'Session musicians'],
+                   ['on_location', 'Recording out on location']] },
+
+          { id: 'location_city', label: 'Where, if not our studio?', type: 'text',
+            half: 1, when: function (s, h) {
+              return needsRecording(s) && h.has('recording_extras', 'on_location'); } },
+
+          { id: 'travel_band', label: 'Roughly how far from Cape Town?', type: 'select',
+            half: 1, unsure: 1, when: function (s, h) {
+              return needsRecording(s) && h.has('recording_extras', 'on_location'); },
+            opts: [['0', 'Local — within about 40 km'],
+                   ['120', 'An hour or two away'],
+                   ['400', 'Further than that']] }
         ] },
 
-      { title: 'Post-production', short: 'Post',
-        note: 'Priced per finished minute, not per session hour. Finishing almost ' +
-              'always costs more than capturing.',
+      { title: 'Finishing & rights', short: 'Finishing',
+        note: 'Finishing almost always costs more than capturing.',
         fields: [
-          { id: 'editing_scope', label: 'Editing required', type: 'select', req: 1, half: 1,
-            opts: [['none', 'None'], ['light_topntail', 'Light — top and tail'],
-                   ['standard_dialogue_edit', 'Standard dialogue edit'],
-                   ['heavy_narrative_edit', 'Heavy narrative edit'],
-                   ['full_story_edit', 'Full story edit']] },
-          { id: 'noise_cleanup', label: 'Noise reduction', type: 'select', req: 1, half: 1,
-            opts: [['none', 'None'], ['standard', 'Standard'],
-                   ['heavy_restoration', 'Heavy restoration']] },
-          { id: 'mixing', label: 'Mixing', type: 'select', req: 1, half: 1,
-            opts: [['none', 'None'], ['stereo_mix', 'Stereo mix'],
-                   ['stem_mix', 'Stem mix'], ['surround_51', '5.1 surround'],
-                   ['atmos', 'Dolby Atmos']] },
-          { id: 'mastering', label: 'Mastering', type: 'select', req: 1, half: 1,
-            opts: [['none', 'None'], ['single_target', 'One delivery target'],
-                   ['multi_platform_targets', 'Several platform targets']] },
-          { id: 'loudness_target', label: 'Delivery loudness standard', type: 'select',
-            req: 1, half: 1,
-            help: 'Getting this wrong means redelivering everything, so we\'d rather ' +
-                  'ask than assume.',
-            opts: [['podcast_-16lufs', 'Podcast / spoken — −16 LUFS'],
-                   ['music_-14lufs', 'Music streaming — −14 LUFS'],
-                   ['broadcast_-23lufs', 'Broadcast — −23 LUFS'],
-                   ['cinema', 'Cinema'], ['not_sure', 'Not sure — pick for us']] },
+          { id: 'editing_scope', label: 'How much editing?', type: 'select', req: 1, half: 1,
+            opts: [['none', 'None needed'],
+                   ['light', 'Light — top and tail'],
+                   ['standard', 'Standard — tidy it properly'],
+                   ['heavy', 'Heavy — shape it into a story']] },
+
+          { id: 'cleanup', label: 'Noise and cleanup', type: 'select', req: 1, half: 1,
+            opts: [['none', 'None needed'], ['standard', 'Standard'],
+                   ['heavy', 'Heavy — it needs rescuing']] },
+
+          { id: 'mix_level', label: 'Mixing and mastering', type: 'select', req: 1, half: 1,
+            opts: [['none', 'Neither'],
+                   ['stereo', 'Mix and master, stereo'],
+                   ['stem', 'Mix with stems, and master']] },
+
+          { id: 'loudness_target', label: 'Where is it going?', type: 'select', req: 1,
+            half: 1,
+            help: 'This sets the loudness standard. Getting it wrong means ' +
+                  'redelivering everything.',
+            opts: [['podcast_-16lufs', 'Podcast or spoken word'],
+                   ['music_-14lufs', 'Music streaming'],
+                   ['broadcast_-23lufs', 'Broadcast'],
+                   ['cinema', 'Cinema'],
+                   ['not_sure', 'Not sure — pick for us']] },
+
           { id: 'sound_design', label: 'Sound design and effects', type: 'select',
             req: 1, half: 1,
-            opts: [['none', 'None'], ['light_transitions', 'Light — transitions'],
-                   ['moderate_scene_beds', 'Moderate — scene beds'],
-                   ['heavy_immersive', 'Heavy — immersive']] },
-          { id: 'sfx_count', label: 'Roughly how many designed effects', type: 'number',
-            half: 1, when: function (s) {
-              return ['moderate_scene_beds', 'heavy_immersive'].indexOf(s.sound_design) !== -1; } },
-          { id: 'foley', label: 'Custom foley', type: 'select', half: 1,
-            opts: [['none', 'None'], ['light', 'Light'], ['full_foley_pass', 'Full pass']] },
-          { id: 'foley_scene_minutes', label: 'Minutes of foley coverage', type: 'number',
-            half: 1, when: function (s) { return s.foley && s.foley !== 'none'; } },
-          { id: 'adr_required', label: 'ADR / dialogue replacement', type: 'bool' },
-          { id: 'adr_lines', label: 'Approximate ADR lines', type: 'number', half: 1,
-            when: function (s) { return s.adr_required === true; } },
-          { id: 'music_needs', label: 'Music', type: 'select', req: 1, half: 1,
-            opts: [['none', 'None'], ['library_licensed', 'Library, licensed'],
-                   ['original_composed', 'Originally composed'],
-                   ['commercial_track', 'A commercially released track']] },
-          { id: 'music_minutes', label: 'Minutes of original music', type: 'number',
-            half: 1, when: function (s) { return s.music_needs === 'original_composed'; } },
-          { id: 'music_arrangement', label: 'Instrumentation', type: 'select', half: 1,
-            when: function (s) { return s.music_needs === 'original_composed'; },
-            opts: [['solo_electronic', 'Solo or electronic'],
-                   ['small_ensemble', 'Small ensemble'],
-                   ['live_session_players', 'Live session players'],
-                   ['orchestral', 'Orchestral']] },
-          { id: 'intro_outro', label: 'Branded intro and outro package', type: 'bool' },
-          { id: 'sonic_logo', label: 'Sonic logo / audio brand mark', type: 'bool' }
-        ] },
+            opts: [['none', 'None'],
+                   ['light_transitions', 'Light — stings and transitions'],
+                   ['moderate_scene_beds', 'Moderate — atmospheres and beds'],
+                   ['heavy_immersive', 'Heavy — fully designed']] },
 
-      { title: 'Delivery & rights', short: 'Delivery',
-        fields: [
-          { id: 'delivery_formats', label: 'Formats needed', type: 'multi', req: 1,
-            opts: [['mp3', 'MP3'], ['wav_16_44', 'WAV 16/44.1'], ['wav_24_48', 'WAV 24/48'],
-                   ['aac', 'AAC'], ['stems', 'Stems'], ['omf_aaf', 'OMF / AAF'],
-                   ['broadcast_wav', 'Broadcast WAV']] },
-          { id: 'alt_versions', label: 'Alternate versions', type: 'multi',
-            opts: [['instrumental', 'Instrumental'], ['dialogue_free_MnE', 'Music & effects'],
-                   ['shortened_cutdown', 'Shortened cutdown'], ['clean_censored', 'Clean version']] },
-          { id: 'transcription', label: 'Transcript', type: 'select', half: 1,
-            opts: [['none', 'None'], ['raw_transcript', 'Raw transcript'],
-                   ['edited_transcript', 'Edited transcript'],
-                   ['show_notes', 'Transcript and show notes']] },
-          { id: 'chapter_markers', label: 'Chapter markers and metadata', type: 'bool' },
-          { id: 'hosting_distribution_help', label: 'Help with hosting and publishing',
-            type: 'bool' },
+          { id: 'music_needs', label: 'Music', type: 'select', req: 1, half: 1,
+            opts: [['none', 'None'], ['library_licensed', 'A licensed library track'],
+                   ['original_composed', 'Originally composed'],
+                   ['commercial_track', 'A song you already have in mind']] },
+
+          { id: 'finishing_extras', label: 'Anything else?', type: 'multi',
+            opts: [['intro_outro', 'A branded intro and outro'],
+                   ['sonic_logo', 'A sonic logo'],
+                   ['foley', 'Custom foley'],
+                   ['stems', 'Stems delivered'],
+                   ['transcript', 'Transcripts and show notes'],
+                   ['markers', 'Chapter markers'],
+                   ['publishing', 'Help getting it published'],
+                   ['extra_revision', 'An extra round of revisions']] },
+
           { id: 'distribution', label: 'Where will it be published?', type: 'multi', req: 1,
-            opts: [['internal', 'Internal only'], ['podcast_platforms', 'Podcast platforms'],
-                   ['website', 'Your website'], ['organic_social', 'Organic social'],
-                   ['paid_ads', 'Paid advertising'], ['broadcast_radio', 'Broadcast radio'],
-                   ['broadcast_tv', 'Broadcast TV'], ['cinema', 'Cinema'],
+            opts: [['internal', 'Internally only'],
+                   ['podcast_platforms', 'Podcast platforms'],
+                   ['website', 'Your website'],
+                   ['organic_social', 'Social media'],
+                   ['paid_ads', 'Paid advertising'],
+                   ['broadcast_radio', 'Radio'],
+                   ['broadcast_tv', 'TV'],
+                   ['cinema', 'Cinema'],
                    ['game_app', 'A game or app'],
                    ['retail_music_streaming', 'Music streaming platforms']] },
-          { id: 'usage_term', label: 'Usage term', type: 'select', req: 1, half: 1,
-            opts: [['6_months', 'Six months'], ['1_year', 'One year'],
+
+          { id: 'usage_term', label: 'For how long?', type: 'select', req: 1, half: 1,
+            opts: [['6_months', 'Six months'], ['1_year', 'A year'],
                    ['3_years', 'Three years'], ['perpetual', 'Indefinitely']] },
-          { id: 'usage_territory', label: 'Territory', type: 'select', req: 1, half: 1,
-            opts: [['local', 'Local'], ['national', 'National'], ['worldwide', 'Worldwide']] },
+
           { id: 'rights_ownership', label: 'Who owns the finished audio?', type: 'select',
-            req: 1,
+            req: 1, half: 1,
             opts: [['agency_licenses_to_client', 'You licence it from us'],
                    ['full_buyout_to_client', 'We buy it outright'],
                    ['work_for_hire', 'Work for hire']] },
-          { id: 'pro_registration', label: 'PRO or publishing registration needed',
-            type: 'bool' },
-          { id: 'revision_rounds', label: 'Revision rounds', type: 'select', req: 1, half: 1,
-            opts: [['2_standard', 'Two — standard'], ['3', 'Three'], ['4_plus', 'Four or more']] },
-          { id: 'turnaround', label: 'Turnaround', type: 'select', req: 1, half: 1,
-            opts: [['standard_2wk', 'Standard — 2 weeks'], ['expedited_1wk', 'Expedited — 1 week'],
-                   ['rush_48hr', 'Rush — 48 hours']] },
 
-          { id: 'template_choice', label: 'Proposal layout', type: 'select', req: 1,
-            opts: [['let_us_recommend', 'Recommend one for me'],
-                   ['podcast_production', 'Podcast — per-episode workflow and rates'],
-                   ['commercial_audio_foley', 'Commercial — deliverables matrix and spec'],
-                   ['music_film_scoring', 'Scoring — cue sheet and rights']] },
-          { id: 'include_samples', label: 'Include audio samples', type: 'bool' }
+          { id: 'turnaround', label: 'How soon?', type: 'select', req: 1, half: 1,
+            opts: [['standard_2wk', 'Two weeks is fine'],
+                   ['expedited_1wk', 'Within a week'],
+                   ['rush_48hr', 'Within 48 hours']] },
+
+          { id: 'notes', label: 'Anything we should know?', type: 'textarea', rows: 3 },
+
+          { id: 'template_choice', label: 'Proposal style', type: 'select', req: 1,
+            opts: [['let_us_recommend', 'Pick one for me'],
+                   ['podcast_production', 'Podcast — per-episode rates'],
+                   ['commercial_audio_foley', 'Commercial — deliverables and spec'],
+                   ['music_film_scoring', 'Scoring — cue sheet and rights']] }
         ] }
     ],
 
-    /* --------------------------------------------------------------------
-       Pricing — 04-sound-design/02-proposal-logic.md
-       -------------------------------------------------------------------- */
     calc: function (s, h) {
-      var flags = [], deferred = [];
+      var flags = [], deferred = [], assumed = [];
+      var re = function (k) { return h.has('recording_extras', k); };
+      var fe = function (k) { return h.has('finishing_extras', k); };
 
-      var Rm = h.num('total_runtime_min', 0);
-      if (!Rm || h.unsure('total_runtime_min')) { Rm = 30; flags.push('runtime_estimated'); }
-      var N = Math.max(1, h.num('deliverable_count', 1));
-      var sessions = Math.max(1, h.num('session_count', 1));
-
-      /* §3 recording */
-      var record = [];
-      var RECORD = 0, prodDays = 1, crew = 1;
-
-      var skip = !needsRecording(s) || s.studio_required === 'none_client_records';
-      if (!skip) {
-        var hrs = h.num('studio_hours', 0);
-        if (!hrs || h.unsure('studio_hours')) {
-          var ratio = ['podcast_series', 'podcast_single', 'voiceover', 'audiobook']
-            .indexOf(s.audio_project_type) !== -1 ? 1.4
-            : s.audio_project_type === 'music_recording' ? 4
-            : s.audio_project_type === 'film_scoring' ? 2.5 : 2;
-          hrs = Math.ceil(Rm * ratio / 60) || 2;
-          hrs = Math.max(2, hrs);
-          flags.push('studio_hours_estimated');
-        }
-        prodDays = Math.max(1, Math.ceil(hrs / 8));
-        crew = 1 + (s.engineer_required === 'yes' ? 1 : 0) +
-               (h.bool('direction_required') ? 1 : 0) +
-               (s.talent_needed === 'we_cast' ? h.num('talent_count', 1) : 0) +
-               h.num('musicians_count', 0);
-
-        var ROOM;
-        if (s.studio_required === 'remote_direction') ROOM = hrs * R.REMOTE_HOUR;
-        else if (h.bool('on_location_recording')) ROOM = hrs * R.FIELD_HOUR;
-        else ROOM = hrs >= 7 ? R.STUDIO_DAY * Math.ceil(hrs / 8) : hrs * R.STUDIO_HOUR;
-        if (h.bool('live_room_needed')) ROOM += hrs * R.LIVE_ROOM;
-
-        var ENGINEER = s.engineer_required === 'yes' ? hrs * R.ENGINEER_HOUR : 0;
-        var DIRECTION = h.bool('direction_required') ? hrs * R.DIRECTION_HOUR : 0;
-        var TALENT = s.talent_needed === 'we_cast'
-          ? h.num('talent_count', 1) * R.TALENT_SESSION * sessions : 0;
-        var MUSICIANS = h.num('musicians_count', 0) * R.MUSICIAN_SESSION * sessions;
-
-        RECORD = ROOM + ENGINEER + DIRECTION + TALENT + MUSICIANS;
-
-        record.push({ label: h.bool('on_location_recording') ? 'Location recording' : 'Studio time',
-          qty: hrs, unit: 'hrs', amount: ROOM });
-        if (ENGINEER) record.push({ label: 'Recording engineer', qty: hrs, unit: 'hrs', amount: ENGINEER });
-        if (DIRECTION) record.push({ label: 'Session direction', qty: hrs, unit: 'hrs', amount: DIRECTION });
-        if (TALENT) record.push({ label: 'Voice talent — session fees',
-          qty: h.num('talent_count', 1), unit: 'voices', amount: TALENT });
-        if (MUSICIANS) record.push({ label: 'Session musicians',
-          qty: h.num('musicians_count', 0), unit: 'players', amount: MUSICIANS });
-      }
-
-      var TALENT_FEES = record.reduce(function (a, i) {
-        return a + (/talent|musician/i.test(i.label) ? i.amount : 0); }, 0);
-
-      if (h.bool('talent_usage_buyout')) {
-        flags.push('talent_buyout_manual_quote');
-        deferred.push({ label: 'Voice talent usage buyout', reason:
-          'The session fee is above; the buyout is separate and depends on where ' +
-          'the audio runs and for how long. A producer sets it rather than a formula.' });
-      }
-
-      /* §4 post */
-      var post = [];
+      var Rm = h.num('runtime_band', 0);
+      if (!Rm) { Rm = 30; flags.push('runtime_estimated'); }
+      var N = Math.max(1, h.num('piece_count', 1));
       var spoken = isSpoken(s);
 
+      /* --- Recording --- */
+      var record = [], RECORD = 0, prodDays = 1, crew = 1;
+      if (needsRecording(s)) {
+        var hrs = h.num('studio_band', 0);
+        if (!hrs) { hrs = 4; flags.push('studio_hours_estimated'); }
+        prodDays = Math.max(1, Math.ceil(hrs / 8));
+        crew = 1 + (re('engineer') ? 1 : 0) + (re('direction') ? 1 : 0) +
+               (re('talent') ? 1 : 0) + (re('musicians') ? 3 : 0);
+
+        var ROOM = re('on_location') ? hrs * R.FIELD_HOUR
+                 : hrs >= 7 ? R.STUDIO_DAY * Math.ceil(hrs / 8)
+                 : hrs * R.STUDIO_HOUR;
+        record.push({ label: re('on_location') ? 'Location recording' : 'Studio time',
+          qty: hrs, unit: 'hrs', amount: ROOM });
+        RECORD += ROOM;
+
+        if (re('engineer')) {
+          var ENG = hrs * R.ENGINEER_HOUR;
+          record.push({ label: 'Engineer', qty: hrs, unit: 'hrs', amount: ENG });
+          RECORD += ENG;
+        }
+        if (re('direction')) {
+          var DIR = hrs * 125;
+          record.push({ label: 'Session direction', qty: hrs, unit: 'hrs', amount: DIR });
+          RECORD += DIR;
+        }
+        if (re('talent')) {
+          var TAL = R.TALENT_SESSION * prodDays;
+          record.push({ label: 'Voice talent — session fee', qty: 1, unit: 'voice', amount: TAL });
+          RECORD += TAL;
+          assumed.push('one voice — tell us if you need more');
+          deferred.push({ label: 'Voice talent usage buyout', reason:
+            'The session fee is above. The buyout depends on where the audio runs and ' +
+            'for how long, and is set by a person rather than a formula.' });
+        }
+        if (re('musicians')) {
+          var MUS = 3 * R.MUSICIAN_SESSION * prodDays;
+          record.push({ label: 'Session musicians', qty: 3, unit: 'players', amount: MUS });
+          RECORD += MUS;
+          assumed.push('three session players');
+        }
+      }
+      var performerFees = record.reduce(function (a, i) {
+        return a + (/talent|musician/i.test(i.label) ? i.amount : 0); }, 0);
+
+      /* --- Finishing --- */
+      var post = [];
       var EDIT = Rm * ((spoken ? R.EDIT_SPOKEN : R.EDIT)[s.editing_scope] || 0);
-      var cleanRate = (spoken ? R.CLEAN_SPOKEN : R.CLEAN)[s.noise_cleanup] || 0;
-      var CLEANUP = Rm * cleanRate;
+      var CLEANUP = Rm * ((spoken ? R.CLEAN_SPOKEN : R.CLEAN)[s.cleanup] || 0);
       if (s.remote_recording === 'all_remote') CLEANUP *= 1.4;
       else if (s.remote_recording === 'hybrid') CLEANUP *= 1.2;
-      if (s.source_material_state === 'poor_quality_needs_rescue') {
-        CLEANUP *= 1.6;
-        flags.push('source_quality_risk');
+      if (s.source_state === 'poor_quality_needs_rescue') {
+        CLEANUP *= 1.6; flags.push('source_quality_risk');
       }
 
-      /* Per piece for speech, per finished minute for dense audio. */
-      var MIX;
-      if (s.mixing === 'atmos') {
-        MIX = Rm * R.MIX.surround_51 * 1.8;
-        flags.push('atmos_manual_quote');
-      } else if (spoken) {
-        MIX = N * (R.MIX_PIECE[s.mixing] || 0);
-      } else {
-        MIX = Rm * (R.MIX[s.mixing] || 0);
+      var MIX = 0, MASTER = 0;
+      if (s.mix_level && s.mix_level !== 'none') {
+        MIX = spoken ? N * R.MIX_PIECE[s.mix_level] : Rm * R.MIX[s.mix_level];
+        MASTER = spoken ? N * R.MASTER_PIECE : Rm * R.MASTER;
       }
 
-      var MASTER = 0;
-      if (s.mastering !== 'none' && s.mastering) {
-        MASTER = spoken
-          ? N * R.MASTER_PIECE +
-            (s.mastering === 'multi_platform_targets' ? N * R.MASTER_PIECE_EXTRA * 2 : 0)
-          : Rm * R.MASTER +
-            (s.mastering === 'multi_platform_targets' ? Rm * R.MASTER_EXTRA * 2 : 0);
-      }
-
-      var sfxCount = h.num('sfx_count', 0);
       var SFX = 0;
       if (s.sound_design === 'light_transitions') SFX = N * 4 * R.SFX_EACH;
-      else if (s.sound_design === 'moderate_scene_beds') {
-        SFX = (sfxCount || N * 10) * R.SFX_EACH + Rm * 0.3 * R.SFX_BED_MIN;
-      } else if (s.sound_design === 'heavy_immersive') {
-        SFX = (sfxCount || N * 25) * R.SFX_EACH + Rm * 0.7 * R.SFX_BED_MIN;
-      }
+      else if (s.sound_design === 'moderate_scene_beds') SFX = N * 10 * R.SFX_EACH + Rm * 0.3 * R.SFX_BED_MIN;
+      else if (s.sound_design === 'heavy_immersive') SFX = N * 25 * R.SFX_EACH + Rm * 0.7 * R.SFX_BED_MIN;
 
-      var foleyMin = h.num('foley_scene_minutes', 0);
-      var FOLEY = s.foley === 'full_foley_pass' ? foleyMin * R.FOLEY_MIN
-                : s.foley === 'light' ? foleyMin * R.FOLEY_MIN * 0.5 : 0;
-      var ADR = h.bool('adr_required') ? h.num('adr_lines', 0) * R.ADR_LINE : 0;
+      var FOLEY = fe('foley') ? Math.min(Rm, 10) * R.FOLEY_MIN : 0;
+      if (FOLEY) assumed.push('up to ten minutes of foley coverage');
 
-      var arrangement = h.pick('music_arrangement',
-        { solo_electronic: 1, small_ensemble: 1.6, live_session_players: 2.4, orchestral: 4 }, 1);
-      if (s.music_arrangement === 'orchestral') flags.push('orchestral_scope');
       var MUSIC = 0;
       if (s.music_needs === 'library_licensed') MUSIC = N * R.MUSIC_LIB;
       else if (s.music_needs === 'original_composed') {
-        MUSIC = h.num('music_minutes', 1) * R.MUSIC_ORIG_MIN * arrangement;
+        MUSIC = Math.min(Rm, 10) * R.MUSIC_ORIG_MIN;
+        assumed.push('up to ten minutes of original music');
       } else if (s.music_needs === 'commercial_track') {
         flags.push('sync_license_manual_quote');
-        deferred.push({ label: 'Commercial music sync licence', reason:
+        deferred.push({ label: 'Licence for a commercially released song', reason:
           'Quoted by the rights holders and hugely variable. Left out deliberately ' +
-          'rather than guessed — tell us the track and we\'ll chase a real number.' });
+          'rather than guessed — tell us the track and we will chase a real number.' });
       }
 
-      var BRANDING = (h.bool('intro_outro') ? R.INTRO_OUTRO : 0) +
-                     (h.bool('sonic_logo') ? R.SONIC_LOGO : 0);
+      var BRANDING = (fe('intro_outro') ? R.INTRO_OUTRO : 0) + (fe('sonic_logo') ? R.SONIC_LOGO : 0);
 
       if (EDIT) post.push({ label: 'Editing', qty: Rm, unit: 'min', amount: EDIT });
-      if (CLEANUP) post.push({ label: 'Noise reduction & cleanup', qty: Rm, unit: 'min', amount: CLEANUP });
-      if (MIX) post.push({ label: 'Mixing', qty: spoken ? N : Rm,
-        unit: spoken ? 'pieces' : 'min', amount: MIX });
-      if (MASTER) post.push({ label: 'Mastering', qty: spoken ? N : Rm,
-        unit: spoken ? 'pieces' : 'min', amount: MASTER });
-      if (SFX) post.push({ label: 'Sound design', qty: sfxCount || null, unit: 'effects', amount: SFX });
-      if (FOLEY) post.push({ label: 'Foley', qty: foleyMin, unit: 'min', amount: FOLEY });
-      if (ADR) post.push({ label: 'ADR', qty: h.num('adr_lines', 0), unit: 'lines', amount: ADR });
+      if (CLEANUP) post.push({ label: 'Cleanup and noise reduction', qty: Rm, unit: 'min', amount: CLEANUP });
+      if (MIX) post.push({ label: 'Mixing', qty: spoken ? N : Rm, unit: spoken ? 'pieces' : 'min', amount: MIX });
+      if (MASTER) post.push({ label: 'Mastering', qty: spoken ? N : Rm, unit: spoken ? 'pieces' : 'min', amount: MASTER });
+      if (SFX) post.push({ label: 'Sound design', qty: null, amount: SFX });
+      if (FOLEY) post.push({ label: 'Foley', qty: null, amount: FOLEY });
       if (MUSIC) post.push({ label: 'Music', qty: null, amount: MUSIC });
       if (BRANDING) post.push({ label: 'Branded intro / sonic identity', qty: null, amount: BRANDING });
 
-      var POST_CORE = EDIT + CLEANUP + MIX + MASTER + SFX + FOLEY + ADR + MUSIC + BRANDING;
+      var POST_CORE = EDIT + CLEANUP + MIX + MASTER + SFX + FOLEY + MUSIC + BRANDING;
 
-      /* §5 deliverables */
+      /* --- Deliverables --- */
       var deliver = [];
-      var altCount = Array.isArray(s.alt_versions) ? s.alt_versions.length : 0;
-      var ALTS = altCount * Rm * R.ALT_VERSION_MIN;
-      var STEMS = h.has('delivery_formats', 'stems') ? N * R.STEMS : 0;
-      var TRANSCR = h.pick('transcription',
-        { raw_transcript: Rm * R.TRANSCRIPT_MIN,
-          edited_transcript: Rm * R.TRANSCRIPT_MIN * 1.8,
-          show_notes: Rm * R.TRANSCRIPT_MIN * 1.8 + N * R.SHOW_NOTES }, 0);
-      var MARKERS = h.bool('chapter_markers') ? N * R.MARKERS : 0;
-      var PUBLISH = h.bool('hosting_distribution_help') ? N * R.PUBLISH : 0;
-      var EXTRA_REV = h.pick('revision_rounds', { '3': R.REVISION, '4_plus': R.REVISION * 2 }, 0);
+      var STEMS = fe('stems') ? N * R.STEMS : 0;
+      var TRANSCR = fe('transcript') ? Rm * R.TRANSCRIPT_MIN * 1.8 + N * R.SHOW_NOTES : 0;
+      var MARKERS = fe('markers') ? N * R.MARKERS : 0;
+      var PUBLISH = fe('publishing') ? N * R.PUBLISH : 0;
+      var EXTRA_REV = fe('extra_revision') ? R.REVISION : 0;
 
-      if (ALTS) deliver.push({ label: altCount + ' alternate version' + (altCount > 1 ? 's' : ''),
-        qty: Rm, unit: 'min', amount: ALTS });
-      if (STEMS) deliver.push({ label: 'Stem delivery', qty: N, unit: 'pieces', amount: STEMS });
-      if (TRANSCR) deliver.push({ label: 'Transcription', qty: Rm, unit: 'min', amount: TRANSCR });
-      if (MARKERS) deliver.push({ label: 'Chapter markers & metadata', qty: N, unit: 'pieces', amount: MARKERS });
-      if (PUBLISH) deliver.push({ label: 'Publishing assistance', qty: N, unit: 'pieces', amount: PUBLISH });
+      if (STEMS) deliver.push({ label: 'Stems', qty: N, unit: 'pieces', amount: STEMS });
+      if (TRANSCR) deliver.push({ label: 'Transcripts and show notes', qty: Rm, unit: 'min', amount: TRANSCR });
+      if (MARKERS) deliver.push({ label: 'Chapter markers', qty: N, unit: 'pieces', amount: MARKERS });
+      if (PUBLISH) deliver.push({ label: 'Publishing help', qty: N, unit: 'pieces', amount: PUBLISH });
 
       var tmult = h.pick('turnaround', { standard_2wk: 1, expedited_1wk: 1.3, rush_48hr: 1.7 }, 1);
-      var beforeRush = POST_CORE + ALTS + STEMS + TRANSCR + MARKERS + PUBLISH;
+      var beforeRush = POST_CORE + STEMS + TRANSCR + MARKERS + PUBLISH;
       var POST = beforeRush * tmult + EXTRA_REV;
-      if (tmult > 1) deliver.push({ label: 'Expedited turnaround', qty: null,
-        amount: beforeRush * (tmult - 1) });
-      if (EXTRA_REV) deliver.push({ label: 'Additional revision rounds', qty: null, amount: EXTRA_REV });
+      if (tmult > 1) deliver.push({ label: 'Faster turnaround', qty: null, amount: beforeRush * (tmult - 1) });
+      if (EXTRA_REV) deliver.push({ label: 'Extra revision round', qty: null, amount: EXTRA_REV });
 
-      if (s.audio_project_type !== 'mastering_only' && RECORD > 0 && POST < RECORD * 0.8) {
-        flags.push('post_underweighted');
+      /* --- Series volume --- */
+      var volumeFactor = 1, recurring = null;
+      if (isSeries(s) && N > 1) {
+        volumeFactor = N >= 20 ? 0.80 : N >= 10 ? 0.87 : N >= 4 ? 0.93 : 1;
+        recurring = { applies: true, unit: 'episode', unitCount: N };
       }
 
-      /* §6 series volume */
-      var episodes = h.num('episode_count', 0);
-      var volumeFactor = 1;
-      var recurring = null;
-      if (isSeries(s) && episodes > 1) {
-        volumeFactor = episodes >= 20 ? 0.80 : episodes >= 10 ? 0.87 : episodes >= 4 ? 0.93 : 1;
-        recurring = { applies: true, unit: 'episode', unitCount: episodes };
-      }
-
-      /* §7 rights */
+      /* --- Rights --- */
       var pts = { internal: 0, website: 1, podcast_platforms: 1, organic_social: 1,
                   game_app: 3, paid_ads: 4, retail_music_streaming: 4,
                   broadcast_radio: 5, broadcast_tv: 6, cinema: 6 };
       var dist = 0;
       Object.keys(pts).forEach(function (k) { if (h.has('distribution', k)) dist += pts[k]; });
       var term = h.pick('usage_term', { '6_months': 0.8, '1_year': 1, '3_years': 1.5, perpetual: 2 }, 1);
-      var terr = h.pick('usage_territory', { local: 1, national: 1.3, worldwide: 1.6 }, 1);
-      var lic = 1 + (dist * 0.05 * term * terr);
+      var lic = 1 + (dist * 0.05 * term);
       if (s.rights_ownership === 'full_buyout_to_client') lic *= 1.35;
       if (s.rights_ownership === 'work_for_hire') lic *= 1.50;
-
-      if (h.bool('pro_registration')) {
-        flags.push('publishing_rights_manual_review');
-        deferred.push({ label: 'PRO registration and publishing administration',
-          reason: 'Contractual rather than production work — it needs a signed ' +
-                  'agreement, not a line on an estimate.' });
-      }
       if (s.rights_ownership === 'work_for_hire' && s.music_needs === 'original_composed') {
         flags.push('work_for_hire_composition');
       }
       if (s.loudness_target === 'not_sure') flags.push('loudness_assumed');
+      if (assumed.length) flags.push('assumptions_made');
 
-      /* §6 travel */
-      var km = h.num('travel_distance_km', 0);
-      var travel = (h.bool('on_location_recording') && km > 40)
-        ? (km - 40) * R.MILEAGE * 2 * prodDays : 0;
+      /* --- Travel --- */
+      var km = h.num('travel_band', 0);
+      var travel = (re('on_location') && km > 40) ? (km - 40) * R.MILEAGE * 2 * prodDays : 0;
       var lodging = 0;
-      if (km > 250 && h.bool('on_location_recording')) {
+      if (km > 250 && re('on_location')) {
         lodging = R.PER_DIEM * crew * Math.max(1, prodDays - 1);
         flags.push('travel_manual_review');
       }
 
       var phases = [];
-      if (record.length) phases.push({ name: 'Recording (hours)', items: record });
-      phases.push({ name: 'Post-production (finished minutes)', items: post });
+      if (record.length) phases.push({ name: 'Recording (by the hour)', items: record });
+      phases.push({ name: 'Finishing (by the minute)', items: post });
       if (deliver.length) phases.push({ name: 'Deliverables', items: deliver });
 
       return {
         base: RECORD, addOns: POST,
-        rushableBase: RECORD,                          /* POST carries TURNAROUND_MULT */
-        licensableBase: Math.max(0, RECORD + POST - TALENT_FEES),
+        rushableBase: RECORD,
+        licensableBase: Math.max(0, RECORD + POST - performerFees),
         licenseMultiplier: lic,
         volumeFactor: volumeFactor,
         travel: travel, lodging: lodging,
+        assumed: assumed,
         phases: phases,
         flags: flags, deferred: deferred,
         recurring: recurring,
         tiers: {
-          good: ['Standard edit rather than heavy', 'Stereo mix',
-                 'A single master target', 'Library music',
-                 'No sound design', 'Two revision rounds'],
-          standard: ['Everything exactly as you\'ve scoped it here'],
-          premium: ['Heavier edit', 'Stem mix', 'Multi-platform mastering',
-                    'Original music', 'Fuller sound design',
-                    'Transcripts and show notes', 'Expedited turnaround']
+          good: ['A standard edit rather than heavy', 'Stereo mix',
+                 'Library music', 'No sound design'],
+          standard: ['Exactly as you have scoped it'],
+          premium: ['A heavier edit', 'Stems delivered', 'Original music',
+                    'Fuller sound design', 'Transcripts and show notes']
         },
         excludes: [
-          'Sync licensing for commercially released recordings',
+          'Licences for commercially released recordings',
           'Talent usage renewals beyond the agreed term',
-          'PRO registration and publishing administration',
+          'Publishing registration and administration',
           'Session musician royalties',
-          'Podcast hosting and distribution fees',
-          'Re-records caused by script changes after approval'
+          'Podcast hosting and distribution fees'
         ],
         timeline: [
           'Contract and deposit',
-          record.length ? 'Session booking confirmed' : 'Files received and checked',
+          record.length ? 'Session booked and confirmed' : 'Files received and checked',
           record.length ? 'Recording' : 'First pass on your material',
           'First edit and rough mix',
-          h.pick('revision_rounds', { '2_standard': 'Two', '3': 'Three', '4_plus': 'Four+' }, 'Two') +
-            ' revision rounds',
-          'Final mix',
-          'Master and delivery — ' + h.pick('turnaround',
+          'Two rounds of revisions',
+          'Final mix, master and delivery — ' + h.pick('turnaround',
             { standard_2wk: 'two weeks', expedited_1wk: 'one week', rush_48hr: '48 hours' },
             'two weeks')
         ]
@@ -518,104 +409,64 @@
     },
 
     flagNotes: {
+      assumptions_made:
+        'Where you ticked an extra we assumed a sensible size for it — one voice, ' +
+        'three players, up to ten minutes of music or foley. Tell us if that is ' +
+        'wrong and we will re-quote.',
       studio_hours_estimated:
-        'You weren\'t sure how much studio time you\'d need, so we\'ve estimated it ' +
-        'from the runtime. Talk records close to real time; music and scoring don\'t. ' +
-        'Worth a quick conversation before we book the room.',
-      runtime_estimated: 'Total runtime was left open, so we\'ve assumed 30 minutes.',
+        'You were not sure how much studio time you need, so we have assumed half a ' +
+        'day. Talk records close to real time; music and scoring do not.',
+      runtime_estimated: 'Total runtime was left open, so we have assumed 30 minutes.',
       source_quality_risk:
-        'You\'ve said the existing recordings are rough. We can do a lot with ' +
-        'difficult audio, but not everything, and we\'d rather show you than promise. ' +
-        'Send two or three minutes of the worst of it and we\'ll do a test pass — ' +
-        'then you\'ll know exactly what you\'re buying.',
+        'You said the existing recordings are rough. We can do a lot with difficult ' +
+        'audio, but not everything, and we would rather show you than promise. Send ' +
+        'two or three minutes of the worst of it and we will do a test pass first.',
       sync_license_manual_quote:
-        'Sync licensing for a commercially released track is quoted by the rights ' +
-        'holders and can range from manageable to eye-watering. It\'s deliberately ' +
-        'not in the figure above.',
-      talent_buyout_manual_quote:
-        'Voice talent has two separate costs: the session, which is in the estimate, ' +
-        'and the usage buyout, which is not. Buyouts depend on where the audio runs ' +
-        'and for how long.',
-      atmos_manual_quote:
-        'An Atmos mix needs a room and a workflow we\'d want to confirm rather than ' +
-        'estimate. The figure shown is indicative only.',
-      publishing_rights_manual_review:
-        'PRO registration and publishing splits are contractual matters. They need a ' +
-        'signed agreement, not a line on an estimate.',
+        'Sync licensing for a commercially released song is quoted by the rights ' +
+        'holders and ranges from manageable to eye-watering. It is deliberately not ' +
+        'in the figure above.',
       work_for_hire_composition:
-        'Work-for-hire on original composition assigns authorship, which is a bigger ' +
-        'step than a licence. The proposal lays out the three ownership options — ' +
-        'worth five minutes to pick the one you actually need.',
+        'Work-for-hire on original music assigns authorship, which is a bigger step ' +
+        'than a licence. Worth five minutes to pick the option you actually need.',
       loudness_assumed:
-        'You weren\'t sure of the loudness target, so we\'ve set it from where the ' +
-        'audio is going and stated the assumption. If a platform has specified one, ' +
-        'tell us — redelivering everything is the avoidable version of this problem.',
-      post_underweighted:
-        'Post is coming out low relative to the recording time. Finishing usually ' +
-        'costs more than capturing, so a producer will sanity-check the inputs.',
-      orchestral_scope:
-        'Orchestral arrangement means players, a room, and a contractor. It\'s priced ' +
-        'here, but at that scale a producer builds the number rather than a formula.',
+        'You were not sure of the loudness target, so we have set it from where the ' +
+        'audio is going. If a platform has specified one, tell us — redelivering ' +
+        'everything is the avoidable version of this problem.',
       lead_time_infeasible:
-        'Your date is very close. The estimate carries an expedited fee, but studio ' +
-        'and post availability need confirming before you rely on it.',
+        'Your date is very close. The estimate carries a rush fee, but studio and ' +
+        'post availability need confirming before you rely on it.',
       travel_manual_review:
         'That distance means overnight travel. The figure shown is a placeholder.'
     },
 
     email: function (s, est, h) {
       var first = (s.client_name || '').split(' ')[0];
-      var Rm = h.num('total_runtime_min', 30);
-      var N = h.num('deliverable_count', 1);
-      var eps = h.num('episode_count', 0);
-
-      var runtimeSummary = eps > 1
-        ? eps + ' episodes, about ' + Math.round(Rm / eps) + ' minutes each'
-        : N + ' piece' + (N === 1 ? '' : 's') + ', ' + Rm + ' minutes in total';
-
-      var recording = s.source_material_state === 'nothing_yet'
-        ? (h.num('studio_hours', 0) || 'some') + ' studio hours' +
-          (s.engineer_required === 'yes' ? ' with an engineer' : '')
-        : 'you supply the recordings, we finish them';
-
-      var loudness = {
-        'podcast_-16lufs': '−16 LUFS', 'music_-14lufs': '−14 LUFS',
-        'broadcast_-23lufs': '−23 LUFS', cinema: 'cinema standard',
-        not_sure: 'the standard for where it\'s going'
-      }[s.loudness_target] || '−16 LUFS';
-
-      var body =
-        'Hi ' + first + ',\n\n' +
-        'Thanks for the detail on ' + (s.project_name || 'your project') +
-        ' — good briefs make for honest\nestimates, and yours was one.\n\n' +
-        'Here\'s the shape of it:\n\n' +
-        '  Project    ' + (s.audio_project_type || 'audio').replace(/_/g, ' ') +
-          ' — ' + runtimeSummary + '\n' +
-        '  Recording  ' + recording + '\n' +
-        '  Delivery   ' + h.pick('turnaround',
-            { standard_2wk: '2 weeks', expedited_1wk: '1 week', rush_48hr: '48 hours' }, '2 weeks') +
-          ', ' + h.pick('revision_rounds',
-            { '2_standard': 'two', '3': 'three', '4_plus': 'four+' }, 'two') +
-          ' rounds of revisions,\n             mastered to ' + loudness + '\n' +
-        (eps > 1 ? '  Per episode $' +
-          Math.round(est.total / eps).toLocaleString('en-US') + '\n' : '') +
-        '  Estimate   $' + Math.round(est.tiers.good.low || est.tiers.good.amount).toLocaleString('en-US') +
-          ' – $' + Math.round(est.tiers.premium.high || est.tiers.premium.amount).toLocaleString('en-US') + '\n\n' +
-        'One thing the estimate makes deliberately visible: recording time and\n' +
-        'finishing time are priced separately, in different units — hours for the\n' +
-        'room, finished minutes for the edit and mix. They\'re genuinely different\n' +
-        'work, and a two-hour session almost never means two hours of work. Better\n' +
-        'you see that structure now than wonder about it on the invoice.\n\n' +
-        (eps > 1 ? 'Because this is a series, the number that matters is the per-episode rate.\nLonger commitments bring it down, and the proposal shows where those\nbreakpoints are.\n\n' : '') +
-        (est.confidence === 'preliminary'
-          ? 'A few details were still open, so this is a range. The one that moves it\nmost is how much editing the material actually needs — usually settled\nfastest by us hearing a few minutes of it.\n\n' : '') +
-        'If you\'d like to hear how we\'d approach it before deciding, I\'m happy to\n' +
-        'do a short sample pass on a few minutes of your material.\n\n' +
-        'Josh\nKriel Ventures\njosh@kriel.us';
+      var Rm = h.num('runtime_band', 30);
+      var N = h.num('piece_count', 1);
+      var series = isSeries(s) && N > 1;
 
       return {
         subject: (s.project_name || 'Your project') + ' — audio proposal & estimate',
-        body: body
+        body:
+          'Hi ' + first + ',\n\n' +
+          'Thanks for the detail on ' + (s.project_name || 'your project') +
+          ' — good briefs make for honest\nestimates, and yours was one.\n\n' +
+          '  Project    ' + (s.audio_project_type || 'audio').replace(/_/g, ' ') +
+            ' — ' + (series ? N + ' episodes' : N + ' piece' + (N === 1 ? '' : 's')) +
+            ', ' + Rm + ' minutes in total\n' +
+          '  Recording  ' + (needsRecording(s)
+            ? (h.num('studio_band', 4) + ' studio hours') : 'you supply it, we finish it') + '\n' +
+          '  Delivery   ' + h.pick('turnaround', { standard_2wk: '2 weeks',
+            expedited_1wk: '1 week', rush_48hr: '48 hours' }, '2 weeks') + '\n' +
+          (series ? '  Per episode $' + Math.round(est.total / N).toLocaleString('en-US') + '\n' : '') +
+          '  Estimate   $' + Math.round(est.tiers.good.low || est.tiers.good.amount).toLocaleString('en-US') +
+            ' – $' + Math.round(est.tiers.premium.high || est.tiers.premium.amount).toLocaleString('en-US') + '\n\n' +
+          'One thing the estimate makes deliberately visible: recording time and\n' +
+          'finishing time are priced separately, in different units — hours for the\n' +
+          'room, minutes for the edit and mix. They are genuinely different work, and\n' +
+          'a two-hour session almost never means two hours of work.\n\n' +
+          (series ? 'Because this is a series, the number that matters is the per-episode rate.\nLonger commitments bring it down.\n\n' : '') +
+          'Josh\nKriel Ventures\njosh@kriel.us'
       };
     }
   };

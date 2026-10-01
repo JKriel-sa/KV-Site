@@ -380,6 +380,7 @@
       payment: sched.map(function (s) { return { milestone: s.milestone, pct: s.pct, amount: total * s.pct }; }),
       recurring: r.recurring || null,
       deferred: r.deferred || [],
+      assumed: r.assumed || [],
       excludes: r.excludes || [],
       timeline: r.timeline || [],
       flags: flags
@@ -679,6 +680,21 @@
     pay.appendChild(pl);
     host.appendChild(pay);
 
+    /* What we assumed. The short forms buy their speed by assuming quantities —
+       two models, one presenter, a 20-page album. Those have to be on the page:
+       a client who agrees to a number without seeing what it was built on is a
+       dispute waiting to happen. */
+    if (est.assumed.length) {
+      var asm = el('div', 'pg__assumed');
+      asm.appendChild(el('h4', null, 'What we have assumed'));
+      var al = el('ul', 'pg__list');
+      est.assumed.forEach(function (t) { al.appendChild(el('li', null, t)); });
+      asm.appendChild(al);
+      asm.appendChild(el('p', 'pg__stepnote',
+        'Any of these can change — tell us and we will re-quote.'));
+      host.appendChild(asm);
+    }
+
     /* Flags and deferred costs: the things a human has to price, shown rather
        than quietly counted as zero. */
     if (est.deferred.length || est.flags.length) {
@@ -884,6 +900,49 @@
   }
 
   /* ======================================================================
+     Bottom beacon
+     A pulsing marker at the foot of the screen while someone is answering
+     questions, so the estimate stays in view without them hunting for it. It
+     appears on first interaction with the form and goes as soon as the
+     estimate itself is on screen. Styling and the deliberately slow pulse are
+     in pg.css.
+     ====================================================================== */
+  var beacon = null, engaged = false;
+
+  function buildBeacon() {
+    var b = el('button', 'pg__beacon');
+    b.type = 'button';
+    b.appendChild(el('span', 'pg__beacon__label', 'Your estimate'));
+    b.appendChild(el('span', 'pg__beacon__step'));
+    b.appendChild(el('span', 'pg__beacon__arrow', '\u2193'));
+    b.addEventListener('click', function () {
+      var head = document.getElementById('pg-heading');
+      (head || mount).scrollIntoView({ block: 'center', behavior: 'smooth' });
+    });
+    document.body.appendChild(b);
+    return b;
+  }
+
+  function syncBeacon() {
+    var wanted = engaged && (view === 'form' || view === 'review');
+    if (!wanted) { if (beacon) beacon.classList.remove('is-on'); return; }
+    if (!beacon) beacon = buildBeacon();
+    beacon.querySelector('.pg__beacon__step').textContent =
+      view === 'review' ? 'ready to build' : 'step ' + (step + 1) + ' of ' + TOTAL_STEPS;
+    beacon.setAttribute('aria-label',
+      'Jump to the estimator — ' + beacon.querySelector('.pg__beacon__step').textContent);
+    beacon.classList.add('is-on');
+  }
+
+  /* "Clicked into a section" — the first time they touch any control in the
+     card. Nothing appears for someone merely scrolling past the page. */
+  mount.addEventListener('focusin', function () {
+    if (engaged) return;
+    engaged = true;
+    syncBeacon();
+  });
+
+  /* ======================================================================
      Paint
      ====================================================================== */
   function paint() {
@@ -911,6 +970,7 @@
       window.scrollTo({ top: top, behavior: 'smooth' });
     }
     paint.started = true;
+    syncBeacon();
   }
 
   paint();
