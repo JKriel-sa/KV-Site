@@ -266,7 +266,7 @@ TEMPLATE = """<!DOCTYPE html>
       <h1 class="kv-svc-hero__title"><span class="rise"><span>{title}</span></span></h1>
       <p class="kv-svc-hero__pitch">{pitch}</p>
       <div class="kv-actions">
-        <a class="kv-btn kv-btn--primary" href="#estimate">{cta}</a>
+        <a class="kv-btn kv-btn--primary" href="#costs">{cta}</a>
         <a class="kv-btn kv-btn--ghost" href="mailto:josh@kriel.us">Email Josh</a>
       </div>
     </div>
@@ -296,7 +296,7 @@ TEMPLATE = """<!DOCTYPE html>
   </div>
 </section>
 
-<section class="kv-section kv-section--dark">
+<section class="kv-section kv-section--dark" id="costs">
   <div class="kv-wrap">
     <div class="kv-head">
       <h2 class="kv-h2">What this usually costs.</h2>
@@ -386,7 +386,7 @@ netlify_fields = "\n".join(
 )
 
 contact_links = "\n".join(
-    '      <a href="../%s/#estimate">%s</a>' % (s, t)
+    '      <a href="../%s/#costs">%s</a>' % (s, t)
     for s, _k, t, _c, _f in SERVICES
 )
 

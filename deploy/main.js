@@ -75,6 +75,36 @@
      invisible. */
   setTimeout(sync, 1200);
 
+  /* --- Fragment landing ---------------------------------------------------
+     `scroll-behavior: smooth` on the root makes the browser *animate* the
+     initial jump to a #fragment, and that animation is routinely dropped if
+     the document is still loading — you end up at the top of the page with
+     the right URL in the bar. It is inconsistent page to page, so it cannot
+     be left to chance on links whose whole job is to land somewhere.
+
+     Once loaded: if the hash names a real element and the reader has not
+     scrolled themselves, put the page where the link asked for. Jumped, not
+     animated, so a second interrupted animation can't swallow it.
+  ------------------------------------------------------------------------ */
+  function landOnHash() {
+    if (!location.hash || location.hash.length < 2) return;
+
+    var target;
+    try { target = document.querySelector(location.hash); } catch (e) { return; }
+    if (!target) return;
+
+    if (window.scrollY > 4) return;                             /* reader moved */
+    if (Math.abs(target.getBoundingClientRect().top) < 4) return; /* already there */
+
+    var root = document.documentElement;
+    var prev = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    target.scrollIntoView();
+    root.style.scrollBehavior = prev;
+  }
+
+  addEventListener('load', landOnHash);
+
   /* --- Year -------------------------------------------------------------- */
   var year = document.getElementById('year');
   if (year) year.textContent = new Date().getFullYear();
